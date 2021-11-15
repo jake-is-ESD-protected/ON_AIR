@@ -3,7 +3,7 @@
 project name:       ESP32_P2P_Sender
 auth:               Jakob T.
 date:               10.11.21
-brief:              driver for ON AIR sign itself (acts as slave usinf ESP-Now)
+brief:              driver for ON AIR controler (acts as master using ESP-Now)
 version:            V1.0
 *****************************************************************************************
 */
@@ -12,15 +12,25 @@ version:            V1.0
 #include "WiFi.h"
 #include "esp_now.h"
 #include "literals.h"
+#include "Wire.h"
+#include "hardware.h"
+#include "display.h"
+#include "bitmaps.h"
 
-#define PUSH_PIN  16
-#define LED_PIN   19
- 
+#define VERBOSE
+
+#ifdef VERBOSE
+  #define DEBUG(msg) {Serial.print(msg);}
+#else
+  #define DEBUG(msg)
+#endif
+
 // this is the mac-address of the receiver, in this case the sign outside
 uint8_t dest_addr[] = {0x24, 0x6F, 0x28, 0x7B, 0x7C, 0x78};
 char inc_cmd[5];
 bool bell_ringing = false;
 int i = 0;
+MicroOLED oled(-1, 1);
 
 
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
@@ -50,7 +60,8 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
 void setup() {
 
   Serial.begin(115200);
-    Serial.printf("****************\nIDENTIFIER: MASTER, ON AIR CMD\n****************\n");
+  Serial.printf("****************\nIDENTIFIER: MASTER, ON AIR CMD\n****************\n");
+  DEBUG("debug test")
 
   pinMode(PUSH_PIN, INPUT);
   pinMode(LED_PIN, OUTPUT);
@@ -77,6 +88,15 @@ void setup() {
   // Register reciever-callback
   esp_now_register_recv_cb(OnDataRecv);
 
+  
+  Wire.begin();
+  oled.begin();
+  oled.clear(ALL);
+  oled.clear(PAGE);
+  oled.setCursor(16, 14);
+  oled.setFontType(1);
+  oled.drawBitmap((uint8_t*)bmp_bell);
+  oled.display();
 }
  
 void loop() {
