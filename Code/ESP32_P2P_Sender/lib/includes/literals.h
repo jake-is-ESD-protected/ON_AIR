@@ -4,7 +4,7 @@
 #define N_CMDS  6
 #define CMD_LEN 5
 
-char cmd[N_CMDS][CMD_LEN] = 
+const char cmd[N_CMDS][CMD_LEN] = 
 {
     "WOEX",
     "MEET",
