@@ -12,15 +12,14 @@ version:            V1.0
 
 #include "esp32now.h"
 
-int i = 0;
-
-bool init_clean = true;
+QueueHandle_t qCMD;
+static int cur_cmd = 0;
 
 
 void setup() {
 
   Serial.begin(115200);
-  DEBUG("****************\nIDENTIFIER: MASTER, ON AIR CMD\n****************\n");
+  DEBUG("\n****************\nIDENTIFIER: MASTER, ON AIR CMD\n****************\n");
 
   init_gpios();
   init_oled();
@@ -28,38 +27,48 @@ void setup() {
   if(chk != 0)
   {
     DEBUG("Could not init esp-now\n");
-    init_clean = false;
     return;
   }
 
+  qCMD = init_ISRs();
   show_init_screen();
+  delay(2000);
+  clear_oled();
+  cur_cmd = LEFT; // jump to idle screen
 }
  
+
 void loop() {
-
-  if(init_clean == false)
+  while(cur_cmd == 0)
   {
-    DEBUG("init not clean, abort.\n");
-    while(1);
+    xQueueReceiveFromISR(qCMD, &cur_cmd, NULL);
   }
+  
+  int cur_state = handle_hw_cmd(cur_cmd);
 
-  DEBUG("Waiting for push...\n");
-  while(digitalRead(PUSH_PIN) == HIGH);
-  while(digitalRead(PUSH_PIN) == LOW); // digital debouncer
+  cur_cmd = 0;
 
-  // Send message via ESP-NOW
-  esp_err_t result = esp_now_send((uint8_t*)dest_addr, (uint8_t *) cmd[i], sizeof(cmd[i]));
-  Serial.printf("Sending %s ...", cmd[i]);
+  //DEBUG("Waiting for input...\n");
+
+  //*******************
+  // YOU ARE HERE
+  //*******************
+  //DEBUG("processing command\n");
+  
+  
+  // // Send message via ESP-NOW
+  // esp_err_t result = esp_now_send((uint8_t*)dest_addr, (uint8_t *) cmd[i], sizeof(cmd[i]));
+  // Serial.printf("Sending %s ...", cmd[i]);
    
-  if (result == ESP_OK) {
-    Serial.println("Sent with success");
-  }
-  else {
-    Serial.println("Error sending the data");
-  }
-  i++;
-  if(i == N_CMDS)
-  {
-    i = 0;
-  }
+  // if (result == ESP_OK) {
+  //   Serial.println("Sent with success");
+  // }
+  // else {
+  //   Serial.println("Error sending the data");
+  // }
+  // i++;
+  // if(i == N_CMDS)
+  // {
+  //   i = 0;
+  // }
 }

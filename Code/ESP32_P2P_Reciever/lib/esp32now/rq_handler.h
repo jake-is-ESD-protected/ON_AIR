@@ -11,8 +11,4 @@ void handle_ESPnow_input(char* cmd, int len);
 
 void handle_ESPnow_output(esp_now_send_status_t* status);
 
-
-int handle_hw_cmd(int hw_cmd);
-
-
 #endif

@@ -2,7 +2,7 @@
 *****************************************************************************************
 header name:        hardware.h
 auth:               Jakob T.
-date:               15.11.21
+date:               16.01.22
 brief:              pin definitions and board-specific info
 version:            V1.1
 *****************************************************************************************
@@ -12,10 +12,9 @@ version:            V1.1
 #define _HARDWARE_H_
 
 #include <Arduino.h>
-#include "SFE_MicroOLED.h"
+#include "LiquidCrystal_I2C.h"
 #include "Wire.h"
 #include "literals.h"
-#include "bitmaps.h"
 
 #ifdef VERBOSE_DEBUG
   #define DEBUG(msg) {Serial.print(msg);}
@@ -23,19 +22,9 @@ version:            V1.1
   #define DEBUG(msg)
 #endif
 
-#define PUSH_PIN  33
-#define RE_DT     32
-#define RE_CLK    35
-#define LED_RED   16
-#define LED_GREEN 17
-#define LED_BLUE  18
-
-#define LEFT      100
-#define RIGHT     101
-#define PUSH      102
-
-#define RESET   -1
-#define DC      1
+#define BUTTON_LED_PIN      23
+#define LED_ARRAY           18
+#define BUTTON_IN_PIN       19
 
 #define STATE_IDLE  0
 #define STATE_WOEX  1
@@ -50,11 +39,6 @@ version:            V1.1
 
 #define IR_DEBOUNCE_TIME  150
 
-void IRAM_ATTR RE1_ISR();
-
-
-void IRAM_ATTR RE2_ISR();
-
 
 void IRAM_ATTR BUT_ISR();
 
@@ -65,16 +49,15 @@ QueueHandle_t init_ISRs(void);
 void init_gpios(void);
 
 
-void init_oled(void);
+void init_lcd(void);
 
 
 void show_init_screen(void);
 
 
-void clear_oled(void);
+void lcd_display_state(int state);
 
 
-void drawbmp(int state, bool invert);
-
+void clear_lcd(void);
 
 #endif

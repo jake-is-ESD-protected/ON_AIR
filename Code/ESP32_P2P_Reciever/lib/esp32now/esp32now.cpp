@@ -13,7 +13,7 @@ version:            V1.1
 // cmd-buffer
 char inc_cmd[5];
 
-extern QueueHandle_t qCMD;
+uint8_t dest_addr[] = {0xC8, 0xC9, 0xA3, 0xD2, 0x31, 0x00};
 
 // info object
 esp_now_peer_info_t peerInfo;
@@ -32,7 +32,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
 }
 
 
-int init_sender(void)
+int init_receiver(void)
 {
     WiFi.mode(WIFI_STA);
     if (esp_now_init() != ESP_OK) {

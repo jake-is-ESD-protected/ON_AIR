@@ -18,5 +18,6 @@ version:            V1.0
 #include "bmp_microphone.h"
 #include "bmp_suitcase.h"
 #include "bmp_work.h"
+#include "bmp_zzz.h"
 
 #endif

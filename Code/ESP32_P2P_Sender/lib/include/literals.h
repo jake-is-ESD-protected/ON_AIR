@@ -1,6 +1,18 @@
 #ifndef _LITERALS_H_
 #define _LITERALS_H_
 
+#define N_CMDS  6
+#define CMD_LEN 5
+
+const char cmd[N_CMDS][CMD_LEN] = 
+{
+    "WOEX",
+    "MEET",
+    "RECO",
+    "WAIT",
+    "WELC",
+    "UERR"
+};
 
 #define ID_BELL_INT             "BELL"
 
