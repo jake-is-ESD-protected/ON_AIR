@@ -1,10 +1,17 @@
 #ifndef _ESP32NOW_H_
 #define _ESP32NOW_H_
 
+#include "esp_now.h"
+#include "WiFi.h"
 #include "rq_handler.h"
 
-const char dest_addr[] = {0x24, 0x6F, 0x28, 0x7B, 0x7C, 0x78};
 
 int init_sender(void);
+
+
+esp_err_t esp_send(uint8_t data);
+
+
+String get_mac(void);
 
 #endif

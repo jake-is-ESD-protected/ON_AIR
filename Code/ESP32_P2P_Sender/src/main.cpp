@@ -29,6 +29,8 @@ void setup() {
     DEBUG("Could not init esp-now\n");
     return;
   }
+  Serial.printf("Device MAC-address: ");
+  Serial.println(get_mac());
 
   qCMD = init_ISRs();
   show_init_screen();
@@ -41,10 +43,10 @@ void setup() {
 void loop() {
   while(cur_cmd == 0)
   {
-    xQueueReceiveFromISR(qCMD, &cur_cmd, NULL);
+    xQueueReceive(qCMD, &cur_cmd, NULL);
   }
   
-  int cur_state = handle_hw_cmd(cur_cmd);
+  int cur_state = handle_cmd(cur_cmd);
 
   cur_cmd = 0;
 

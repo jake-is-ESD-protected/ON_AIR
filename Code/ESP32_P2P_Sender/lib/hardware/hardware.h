@@ -11,10 +11,10 @@ version:            V1.1
 #ifndef _HARDWARE_H_
 #define _HARDWARE_H_
 
+// debug helper
 #include <Arduino.h>
 #include "SFE_MicroOLED.h"
 #include "Wire.h"
-#include "literals.h"
 #include "bitmaps.h"
 
 #ifdef VERBOSE_DEBUG
@@ -23,6 +23,7 @@ version:            V1.1
   #define DEBUG(msg)
 #endif
 
+// pins
 #define PUSH_PIN  33
 #define RE_DT     32
 #define RE_CLK    35
@@ -30,10 +31,11 @@ version:            V1.1
 #define LED_GREEN 17
 #define LED_BLUE  18
 
+// command IDs
 #define LEFT      100
 #define RIGHT     101
 #define PUSH      102
-
+#define BELL_INT  103
 #define RESET   -1
 #define DC      1
 
@@ -45,9 +47,9 @@ version:            V1.1
 #define STATE_WELC  5
 #define STATE_BELL  10
 #define STATE_ERROR 127
-
 #define MAX_STATE   5
 
+// digital debounce
 #define IR_DEBOUNCE_TIME  150
 
 void IRAM_ATTR RE1_ISR();

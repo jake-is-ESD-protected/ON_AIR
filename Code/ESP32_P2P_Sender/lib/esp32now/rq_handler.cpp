@@ -14,24 +14,6 @@ bool bell_ringing = false;
 static int actual_state = STATE_IDLE;
 static int targeted_state = 999; // dummy value
 
-void handle_ESPnow_input(char* cmd, int len)
-{
-    Serial.print("Bytes received: ");
-    Serial.println(len);
-    Serial.print(cmd);
-    if(!strcmp(cmd, ID_BELL_INT))
-    {
-        bell_ringing = true;
-        digitalWrite(LED_RED, HIGH);
-        delay(1000);
-        digitalWrite(LED_RED, LOW);
-    }
-    else
-    {
-        bell_ringing = false;
-    }
-}
-
 
 void handle_ESPnow_output(esp_now_send_status_t* status)
 {
@@ -40,14 +22,13 @@ void handle_ESPnow_output(esp_now_send_status_t* status)
 }
 
 
-int handle_hw_cmd(int hw_cmd)
+int handle_cmd(int inc_cmd)
 {
-    switch(hw_cmd)
+    switch(inc_cmd)
     {
         case PUSH:
             actual_state = targeted_state;
-            drawbmp(actual_state, true);
-            return targeted_state;
+            break;
 
         case LEFT:
             if(targeted_state >= MAX_STATE)
@@ -71,12 +52,23 @@ int handle_hw_cmd(int hw_cmd)
             }
             break;
 
+        case BELL_INT:
+            bell_ringing = true;
+            targeted_state = STATE_BELL;
+            actual_state = targeted_state;
+            break;
+
         default:
             break;
     }
     if(targeted_state == actual_state)
     {
+        // commit to state. Transfer data to slave
         drawbmp(actual_state, true);
+        if(actual_state != STATE_BELL)
+        {
+            esp_send((uint8_t)actual_state);
+        }
     }
     else
     {

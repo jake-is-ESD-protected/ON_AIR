@@ -70,7 +70,7 @@ void lcd_display_state(int state)
     switch(state)
     {
         case STATE_IDLE:
-            lcd.printf("zzz...");
+            lcd.printf(TXT_IDLE);
             digitalWrite(LED_ARRAY, LOW);
             break;
         case STATE_WOEX:
@@ -95,7 +95,6 @@ void lcd_display_state(int state)
             break;
         case STATE_BELL:
             lcd.printf(TXT_RINGING);
-            digitalWrite(LED_ARRAY, LOW);
             break;
         default:
             lcd.printf(TXT_UNKNOWN);

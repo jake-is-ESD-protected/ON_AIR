@@ -10,9 +10,9 @@ version:            V1.1
 
 #include "esp32now.h"
 
-// cmd-buffer
-char inc_cmd[5];
+extern QueueHandle_t qCMD;
 
+// peer address of master ESP
 uint8_t dest_addr[] = {0xC8, 0xC9, 0xA3, 0xD2, 0x31, 0x00};
 
 // info object
@@ -27,11 +27,14 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 
 // on-recieve callback
 void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
-  memcpy(inc_cmd, incomingData, sizeof(inc_cmd));
-  handle_ESPnow_input(inc_cmd, len);
+  // assume cmd is one byte long always
+  uint8_t cmd = *incomingData;
+  Serial.printf("cmd callback: %d\n", cmd);
+  xQueueSend(qCMD, &cmd, 1);
 }
 
 
+// init all required ESP-NOW stats for this device
 int init_receiver(void)
 {
     WiFi.mode(WIFI_STA);
@@ -57,4 +60,18 @@ int init_receiver(void)
     // Register reciever-callback
     esp_now_register_recv_cb(OnDataRecv);
     return 0;
+}
+
+
+// simple wrapper for transmission abstraction
+esp_err_t esp_send(uint8_t data)
+{
+  return esp_now_send(dest_addr, (uint8_t *) &data, sizeof(data));
+}
+
+
+// obtain MAC address of device
+String get_mac(void)
+{
+  return WiFi.macAddress();
 }

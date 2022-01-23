@@ -10,27 +10,24 @@ version:            V1.0
 
 #include "rq_handler.h"
 
-bool bell_ringing = false;
-static int state = STATE_IDLE;
 extern QueueHandle_t qCMD;
 
-void handle_ESPnow_input(char* cur_cmd, int len)
+void handle_cmd(uint8_t inc_cmd)
 {
-    Serial.print("Bytes received: ");
-    Serial.println(len);
-    Serial.print(cur_cmd);
-    int i = 0;
-    while(strcmp(cur_cmd, &cmd[i][0]))
+    if(inc_cmd == STATE_BELL)
     {
-        state = i;
-        i++;
-        if(i == N_CMDS)
+        esp_err_t err = esp_send((uint8_t)BELL_INT);
+        if(err != ESP_OK)
         {
-            state = STATE_ERROR;
-            break;
+            Serial.printf("failed to send data: %d", inc_cmd);
         }
+        while(inc_cmd == 0)
+        {
+            xQueueReceive(qCMD, &inc_cmd, 1);
+        }
+        
     }
-    xQueueSend(qCMD, &state, portMAX_DELAY);
+    lcd_display_state((uint8_t)inc_cmd);
 }
 
 

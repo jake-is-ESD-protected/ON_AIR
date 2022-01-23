@@ -1,21 +1,7 @@
 #ifndef _LITERALS_H_
 #define _LITERALS_H_
 
-#define N_CMDS  6
-#define CMD_LEN 5
-
-const char cmd[N_CMDS][CMD_LEN] = 
-{
-    "WOEX",
-    "MEET",
-    "RECO",
-    "WAIT",
-    "WELC",
-    "UERR"
-};
-
-#define ID_BELL_INT             "BELL"
-
+#define TXT_IDLE                "zzz..."
 #define TXT_WORKING_EXCUSE      "Arbeite gerade."
 #define TXT_MEETING_EXCUSE      "In einem Meeting"
 #define TXT_RECORDING_EXCUSE    "Nehme was auf!"
@@ -26,8 +12,5 @@ const char cmd[N_CMDS][CMD_LEN] =
 
 #define TXT_SUB_SOON            "bin gleich da"
 #define TXT_SUB_LATER           "später bitte..."
-
-#define STATUS_SUCCESS          'S'
-#define STATUS_ERROR            'E'
 
 #endif
