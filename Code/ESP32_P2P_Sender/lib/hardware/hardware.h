@@ -39,6 +39,7 @@ version:            V1.1
 #define RESET   -1
 #define DC      1
 
+// state IDs
 #define STATE_IDLE  0
 #define STATE_WOEX  1
 #define STATE_MEET  2

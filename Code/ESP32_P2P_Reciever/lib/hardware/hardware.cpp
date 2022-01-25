@@ -48,6 +48,17 @@ void init_gpios(void)
     pinMode(BUTTON_LED_PIN, OUTPUT);
 }
 
+void led_on(void)
+{
+    digitalWrite(BUTTON_LED_PIN, HIGH);
+}
+
+
+void led_off(void)
+{
+    digitalWrite(BUTTON_LED_PIN, LOW);
+}
+
 
 void init_lcd(void)
 {
@@ -57,20 +68,30 @@ void init_lcd(void)
 }
 
 
+void display_mac(String mac)
+{
+    lcd.setCursor(0, 1);
+    lcd.println(mac);
+}
+
+
 void show_init_screen(void)
 {
     lcd.setCursor(0, 0);
-    lcd.printf("---[ ON AIR ]---");
+    lcd.printf(TXT_INIT);
 }
 
 
 void lcd_display_state(int state)
 {
     clear_lcd();
+    lcd.backlight();
     switch(state)
     {
         case STATE_IDLE:
             lcd.printf(TXT_IDLE);
+            lcd.setCursor(0, 1);
+            lcd.printf(TXT_SUB_IDLE);
             digitalWrite(LED_ARRAY, LOW);
             break;
         case STATE_WOEX:
@@ -96,6 +117,12 @@ void lcd_display_state(int state)
         case STATE_BELL:
             lcd.printf(TXT_RINGING);
             break;
+        case STATE_NO_RESPONSE:
+            lcd.printf(TXT_NO_RESPONSE);
+            vTaskDelay(DOUBLE_MSG_DELAY / portTICK_PERIOD_MS);
+            lcd.setCursor(0, 1);
+            lcd.printf(TXT_SUB_AWAY);
+            break;    
         default:
             lcd.printf(TXT_UNKNOWN);
             digitalWrite(LED_ARRAY, LOW);
@@ -111,4 +138,10 @@ void clear_lcd(void)
     lcd.setCursor(0, 1);
     lcd.printf("                ");
     lcd.setCursor(0, 0);
+}
+
+
+void dim_lcd(void)
+{
+    lcd.noBacklight();
 }
