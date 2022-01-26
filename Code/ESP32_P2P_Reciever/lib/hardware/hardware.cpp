@@ -25,10 +25,58 @@ void IRAM_ATTR BUT_ISR()
     unsigned long interrupt_time = millis();
     if (interrupt_time - last_interrupt_time_BUT > IR_DEBOUNCE_TIME)
     {
-        int c = STATE_BELL;
-        xQueueSendFromISR(qCMD, &c, NULL);
+        cmd_t c = {
+            .origin = ORG_HW,
+            .content = STATE_BELL
+        };
+        mailbox_push(c, true);
     }
     last_interrupt_time_BUT = interrupt_time;
+}
+
+
+void mailbox_push(cmd_t cmd, bool fromISR)
+{
+    if(fromISR)
+    {
+        xQueueSendFromISR(qCMD, &cmd, NULL);
+    }
+    else
+    {
+        xQueueSend(qCMD, &cmd, 1);
+    }
+    Serial.printf("Pushed '%d' - command of origin '%d' to mailbox\n", cmd.content, cmd.origin);
+}
+
+
+cmd_t mailbox_pop(void)
+{
+    cmd_t cmd = {
+        .origin = ORG_SW,
+        .content = STATE_NO_STATE
+    };
+    xQueueReceive(qCMD, &cmd, 1);
+    Serial.printf("Popped '%d' - command of origin '%d' from mailbox\n", cmd.content, cmd.origin);
+    return cmd;
+}
+
+
+bool mailbox_data_avail(void)
+{
+    if(uxQueueMessagesWaiting(qCMD) == 0)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+QueueHandle_t mailbox_create(uint8_t size)
+{
+    return xQueueCreate(size, sizeof(cmd_t));
 }
 
 
@@ -36,7 +84,7 @@ QueueHandle_t init_ISRs(void)
 {
     attachInterrupt(BUTTON_IN_PIN, BUT_ISR, FALLING);
 
-    qCMD = xQueueCreate(50, sizeof(uint8_t));
+    qCMD = mailbox_create(30);
     return qCMD;
 }
 

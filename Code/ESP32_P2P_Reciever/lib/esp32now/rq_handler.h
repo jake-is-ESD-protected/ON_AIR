@@ -8,7 +8,7 @@
 void handle_ESPnow_output(esp_now_send_status_t* status);
 
 
-void handle_cmd(uint8_t inc_cmd);
+void handle_cmd(cmd_t inc_cmd);
 
 
 void time_led_task(void* param);

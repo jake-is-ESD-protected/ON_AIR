@@ -4,7 +4,7 @@ project name:       ESP32_P2P_Receiver
 auth:               Jakob T.
 date:               16.01.22
 brief:              driver for ON AIR shield (acts as slave using ESP-Now)
-version:            V1.1
+version:            V1.2
 *****************************************************************************************
 */
 
@@ -13,7 +13,11 @@ version:            V1.1
 #include "esp32now.h"
 
 QueueHandle_t qCMD;
-static int cur_cmd = STATE_IDLE;
+
+static cmd_t cur_cmd = {
+  .origin = ORG_NOW,
+  .content = STATE_IDLE
+};
 
 
 void setup() {
@@ -38,15 +42,19 @@ void setup() {
   display_mac(get_mac());
   delay(4000);
   clear_lcd();
+  cmd_t c = {
+    .origin = ORG_SW,
+    .content = STATE_IDLE
+  };
+  mailbox_push(c, false);
 }
 
 
 void loop() {
 
-  while(cur_cmd == STATE_NO_STATE)
+  while(!mailbox_data_avail())
   {
-    xQueueReceive(qCMD, &cur_cmd, 1);
+    // @_@
   }
-  handle_cmd(cur_cmd);
-  cur_cmd = STATE_NO_STATE;
+  handle_cmd(mailbox_pop());
 }
