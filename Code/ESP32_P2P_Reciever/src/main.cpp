@@ -13,31 +13,26 @@ version:            V1.2
 #include "esp32now.h"
 
 QueueHandle_t qCMD;
-
-static cmd_t cur_cmd = {
-  .origin = ORG_NOW,
-  .content = STATE_IDLE
-};
-
+portMUX_TYPE mux;
 
 void setup() {
 
   Serial.begin(115200);
-  DEBUG("\n****************\nIDENTIFIER: SLAVE, ON AIR SHIELD\n****************\n");
+  DEBUG("\r\n****************\r\nIDENTIFIER: SLAVE, ON AIR SHIELD\r\n****************\r\n");
   
   init_gpios();
   init_lcd();
   int chk = init_receiver();
   if(chk != 0)
   {
-    DEBUG("Could not init esp-now\n");
+    DEBUG("Could not init esp-now\r\n");
     return;
   }
   Serial.printf("Device MAC-address: ");
   Serial.println(get_mac());
 
-  qCMD = init_ISRs();
   show_init_screen();
+  qCMD = init_ISRs();
   delay(2000);
   display_mac(get_mac());
   delay(4000);

@@ -14,8 +14,7 @@ IMPORTANT:          THIS AND ONLY THIS FILE HAS PERMISSION TO WRITE TO HARDWARE
 
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-
-
+extern portMUX_TYPE mux;
 extern QueueHandle_t qCMD;
 static unsigned long last_interrupt_time_BUT = 0;
 
@@ -37,6 +36,7 @@ void IRAM_ATTR BUT_ISR()
 
 void mailbox_push(cmd_t cmd, bool fromISR)
 {
+    portENTER_CRITICAL(&mux);
     if(fromISR)
     {
         xQueueSendFromISR(qCMD, &cmd, NULL);
@@ -45,18 +45,21 @@ void mailbox_push(cmd_t cmd, bool fromISR)
     {
         xQueueSend(qCMD, &cmd, 1);
     }
-    Serial.printf("Pushed '%d' - command of origin '%d' to mailbox\n", cmd.content, cmd.origin);
+    Serial.printf("Pushed '%d' - command of origin '%d' to mailbox\r\n", cmd.content, cmd.origin);
+    portEXIT_CRITICAL(&mux);
 }
 
 
 cmd_t mailbox_pop(void)
 {
+    portENTER_CRITICAL(&mux);
     cmd_t cmd = {
         .origin = ORG_SW,
         .content = STATE_NO_STATE
     };
     xQueueReceive(qCMD, &cmd, 1);
-    Serial.printf("Popped '%d' - command of origin '%d' from mailbox\n", cmd.content, cmd.origin);
+    Serial.printf("Popped '%d' - command of origin '%d' from mailbox\r\n", cmd.content, cmd.origin);
+    portEXIT_CRITICAL(&mux);
     return cmd;
 }
 
@@ -83,6 +86,7 @@ QueueHandle_t mailbox_create(uint8_t size)
 QueueHandle_t init_ISRs(void)
 {
     attachInterrupt(BUTTON_IN_PIN, BUT_ISR, FALLING);
+    vPortCPUInitializeMutex(&mux);
 
     qCMD = mailbox_create(30);
     return qCMD;
@@ -95,6 +99,7 @@ void init_gpios(void)
     pinMode(LED_ARRAY, OUTPUT);
     pinMode(BUTTON_LED_PIN, OUTPUT);
 }
+
 
 void led_on(void)
 {
@@ -170,10 +175,24 @@ void lcd_display_state(int state)
             vTaskDelay(DOUBLE_MSG_DELAY / portTICK_PERIOD_MS);
             lcd.setCursor(0, 1);
             lcd.printf(TXT_SUB_AWAY);
+            break;
+        case STATE_ATTRIBUTE_LCD_DARK:
+            dim_lcd();
+            break;
+        case STATE_ATTRIBUTE_BL_ON:
+            digitalWrite(BUTTON_LED_PIN, HIGH);
+            break;
+        case STATE_ATTRIBUTE_BL_OFF:
+            digitalWrite(BUTTON_LED_PIN, LOW);
             break;    
+        case STATE_ATTRIBUTE_LA_ON:
+            digitalWrite(LED_ARRAY, HIGH);
+            break;
+        case STATE_ATTRIBUTE_LA_OFF:
+            digitalWrite(LED_ARRAY, LOW);
+            break;                
         default:
             lcd.printf(TXT_UNKNOWN);
-            digitalWrite(LED_ARRAY, LOW);
     }
 }
 

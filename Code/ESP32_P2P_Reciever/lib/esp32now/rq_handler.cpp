@@ -38,7 +38,7 @@ void handle_cmd(cmd_t inc_cmd)
         esp_err_t err = esp_send((uint8_t)BELL_INT);
         if(err != ESP_OK)
         {
-            Serial.printf("failed to send data: %d", inc_cmd.content);
+            Serial.printf("failed to send data: %d\r\n", inc_cmd.content);
         }
         xTaskCreate(time_led_task, 
                 "start a timer which steers blinking for 5 s",
@@ -73,7 +73,7 @@ void handle_cmd(cmd_t inc_cmd)
     {
         xTaskCreate(dim_lcd_task,
                     "go into power saving mode",
-                    1024,
+                    2048,
                     NULL,
                     1,
                     &tDim);
@@ -88,7 +88,7 @@ void handle_cmd(cmd_t inc_cmd)
         dim_alive = false;
         
         vTaskDelete(tDim);
-        Serial.printf("killed dim-task\n");
+        Serial.printf("killed dim-task\r\n");
     }
 
     lcd_display_state(inc_cmd.content);
@@ -96,16 +96,17 @@ void handle_cmd(cmd_t inc_cmd)
     if(inc_cmd.content != STATE_NO_RESPONSE && inc_cmd.content != STATE_BELL)
     {   // skip any instances of the no response state or
         // bell state since they should not be returned to
+        Serial.printf("last_cmd '%d' overwritten by '%d'\r\n", last_cmd.content, inc_cmd.content);
         last_cmd = inc_cmd;
     }
 
-    Serial.printf("tim-task: %d, led-task: %d, dim-task: %d\n", tim_alive, led_alive, dim_alive);
+    Serial.printf("tim-task: %d, led-task: %d, dim-task: %d\r\n", tim_alive, led_alive, dim_alive);
 }
 
 
 void handle_ESPnow_output(esp_now_send_status_t* status)
 {
-    Serial.print("\r\nLast Packet Send Status:\t");
+    Serial.print("Last Packet Send Status:\t");
     Serial.println(*status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
@@ -125,7 +126,7 @@ void time_led_task(void* param)
     vTaskDelay(RING_TIME / portTICK_PERIOD_MS);
 
     vTaskDelete(tLED);
-    led_off();
+    mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, false);
     led_alive = false;
     cmd_t cmd = {
         .origin = ORG_SW,
@@ -146,9 +147,10 @@ void toggle_led_task(void* param)
     {
         for(int i = 0; i < 3; i++)
         {
-            led_on();
+            
+            mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_BL_ON}, false);
             vTaskDelay(100 / portTICK_PERIOD_MS);
-            led_off();
+            mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_BL_OFF}, false);
             vTaskDelay(100 / portTICK_PERIOD_MS);
         }
         vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -160,7 +162,7 @@ void dim_lcd_task(void* param)  // TASK NOT GETTING KILLED!!!
 {
     dim_alive = true;
     vTaskDelay(POWER_SAVE_TIME / portTICK_PERIOD_MS);
-    dim_lcd();
+    mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LCD_DARK}, false);
     dim_alive = false;
     vTaskDelete(NULL);
 }

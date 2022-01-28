@@ -24,32 +24,41 @@ version:            V1.1
 #endif
 
 // pins
-#define BUTTON_LED_PIN      23
-#define LED_ARRAY           18
-#define BUTTON_IN_PIN       19
+#define BUTTON_LED_PIN            23
+#define LED_ARRAY                 18
+#define BUTTON_IN_PIN             19
 
-// command IDs
-#define BELL_INT            103
+// command IDs      
+#define BELL_INT                  103
 
-// state IDs
-#define STATE_NO_STATE      126
-#define STATE_IDLE          0
-#define STATE_WOEX          1
-#define STATE_MEET          2
-#define STATE_RECO          3
-#define STATE_WAIT          4
-#define STATE_WELC          5
-#define STATE_BELL          10
-#define STATE_NO_RESPONSE   11
-#define STATE_ERROR         127
+// persistant states
+#define STATE_IDLE                0
+#define STATE_WOEX                1
+#define STATE_MEET                2
+#define STATE_RECO                3
+#define STATE_WAIT                4
+#define STATE_WELC                5
+
+// transitional states  
+#define STATE_BELL                60
+#define STATE_NO_RESPONSE         70
+#define STATE_NO_STATE            80
+#define STATE_ERROR               90
+
+// state attributes
+#define STATE_ATTRIBUTE_LCD_DARK  100
+#define STATE_ATTRIBUTE_BL_ON     101
+#define STATE_ATTRIBUTE_BL_OFF    102
+#define STATE_ATTRIBUTE_LA_ON     103
+#define STATE_ATTRIBUTE_LA_OFF    104
 
 // digital debounce
-#define IR_DEBOUNCE_TIME    400
+#define IR_DEBOUNCE_TIME          400
 
-// timings
-#define RING_TIME           20000
-#define POWER_SAVE_TIME     20000
-#define DOUBLE_MSG_DELAY    2000
+// timings      
+#define RING_TIME                 20000
+#define POWER_SAVE_TIME           10000
+#define DOUBLE_MSG_DELAY          2000
 
 // command data type
 typedef struct {
