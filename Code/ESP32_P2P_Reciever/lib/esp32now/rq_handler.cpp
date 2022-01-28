@@ -11,10 +11,10 @@ version:            V1.0
 #include "rq_handler.h"
 
 extern QueueHandle_t qCMD;
+extern portMUX_TYPE mux;
 
 // each task receives an alive-flag
 bool tim_alive = false;
-bool led_alive = false;
 bool dim_alive = false;
 
 static cmd_t last_cmd = {
@@ -49,20 +49,12 @@ void handle_cmd(cmd_t inc_cmd)
     }
 
     /*  
-        button has been pressed:
-        proceed to send message to master
-        blink LED for RING_TIME ms
+        cancel ringing task if answer occurs from master
     */
-    if(inc_cmd.content != STATE_NO_RESPONSE && inc_cmd.content != STATE_BELL)
+    if((inc_cmd.content < STATE_TRANS_BORDER_C) && tim_alive)
     {
-        if(tim_alive)
-        {
-            vTaskDelete(tTim); // program gets stuck here???
-        }
-        if(led_alive)
-        {
-            vTaskDelete(tLED);
-        }
+        vTaskDelete(tTim); // program gets stuck here???
+        tim_alive = false;
     }
 
     /*  
@@ -93,14 +85,13 @@ void handle_cmd(cmd_t inc_cmd)
 
     lcd_display_state(inc_cmd.content);
 
-    if(inc_cmd.content != STATE_NO_RESPONSE && inc_cmd.content != STATE_BELL)
-    {   // skip any instances of the no response state or
-        // bell state since they should not be returned to
+    if(inc_cmd.content < STATE_TRANS_BORDER_C)          
+    {   // skip any instances of transitional states
         Serial.printf("last_cmd '%d' overwritten by '%d'\r\n", last_cmd.content, inc_cmd.content);
         last_cmd = inc_cmd;
     }
 
-    Serial.printf("tim-task: %d, led-task: %d, dim-task: %d\r\n", tim_alive, led_alive, dim_alive);
+    Serial.printf("tim-task: %d, dim-task: %d\r\n", tim_alive, dim_alive);
 }
 
 
@@ -114,20 +105,9 @@ void handle_ESPnow_output(esp_now_send_status_t* status)
 void time_led_task(void* param)
 {
     tim_alive = true;
-    TaskHandle_t tLED = (TaskHandle_t)param;
-    xTaskCreate(toggle_led_task, 
-                "toggle LED for bell-application",
-                1024,
-                NULL,
-                1,
-                &tLED);
-    led_alive = true;            
-
-    vTaskDelay(RING_TIME / portTICK_PERIOD_MS);
-
-    vTaskDelete(tLED);
+    led_blink();
     mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, false);
-    led_alive = false;
+    
     cmd_t cmd = {
         .origin = ORG_SW,
         .content = STATE_NO_RESPONSE
@@ -138,23 +118,6 @@ void time_led_task(void* param)
     mailbox_push(cmd, false);
     tim_alive = false;
     vTaskDelete(NULL);
-}
-
-
-void toggle_led_task(void* param)
-{
-    while(1)
-    {
-        for(int i = 0; i < 3; i++)
-        {
-            
-            mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_BL_ON}, false);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-            mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_BL_OFF}, false);
-            vTaskDelay(100 / portTICK_PERIOD_MS);
-        }
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
 }
 
 

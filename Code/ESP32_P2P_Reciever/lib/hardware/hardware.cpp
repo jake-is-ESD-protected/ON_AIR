@@ -72,6 +72,7 @@ bool mailbox_data_avail(void)
     }
     else
     {
+        Serial.printf("Messages waiting: %d\r\n", uxQueueMessagesWaiting(qCMD));
         return true;
     }
 }
@@ -110,6 +111,23 @@ void led_on(void)
 void led_off(void)
 {
     digitalWrite(BUTTON_LED_PIN, LOW);
+}
+
+
+void led_blink(void)
+{
+    for(int k = 0; k < RING_TIME; k++)
+    {
+        for(int i = 0; i < 3; i++)
+        {
+            
+            digitalWrite(BUTTON_LED_PIN, HIGH);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+            digitalWrite(BUTTON_LED_PIN, LOW);
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
 }
 
 

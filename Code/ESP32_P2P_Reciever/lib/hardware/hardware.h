@@ -31,6 +31,14 @@ version:            V1.1
 // command IDs      
 #define BELL_INT                  103
 
+/*
+  The macros here are specifically made
+  to be identifiable by value. Only this
+  way a complete exclusion of e.g. tran-
+  sitional states can be achieved by
+  simply checking "if(cmd < 100)"
+*/
+
 // persistant states
 #define STATE_IDLE                0
 #define STATE_WOEX                1
@@ -39,13 +47,15 @@ version:            V1.1
 #define STATE_WAIT                4
 #define STATE_WELC                5
 
-// transitional states  
+// transitional states
+#define STATE_TRANS_BORDER_C      10
 #define STATE_BELL                60
 #define STATE_NO_RESPONSE         70
 #define STATE_NO_STATE            80
 #define STATE_ERROR               90
 
 // state attributes
+#define STATE_ATTRIBUTE_BORDER_C  100
 #define STATE_ATTRIBUTE_LCD_DARK  100
 #define STATE_ATTRIBUTE_BL_ON     101
 #define STATE_ATTRIBUTE_BL_OFF    102
@@ -53,10 +63,10 @@ version:            V1.1
 #define STATE_ATTRIBUTE_LA_OFF    104
 
 // digital debounce
-#define IR_DEBOUNCE_TIME          400
+#define IR_DEBOUNCE_TIME          5000
 
 // timings      
-#define RING_TIME                 20000
+#define RING_TIME                 5
 #define POWER_SAVE_TIME           10000
 #define DOUBLE_MSG_DELAY          2000
 
@@ -106,6 +116,10 @@ void led_on(void);
 
 // turn off LED-array
 void led_off(void);
+
+
+// blink button LED by fixed amount
+void led_blink(void);
 
 
 // init the LCD-object
