@@ -13,9 +13,10 @@ version:            V1.0
 extern QueueHandle_t qCMD;
 extern portMUX_TYPE mux;
 
-// each task receives an alive-flag
 bool tim_alive = false;
 bool dim_alive = false;
+bool led_alive = false;
+
 
 static cmd_t last_cmd = {
     .origin = ORG_NOW,
@@ -25,7 +26,6 @@ static cmd_t last_cmd = {
 void handle_cmd(cmd_t inc_cmd)
 {
     TaskHandle_t tTim = NULL;
-    TaskHandle_t tLED = NULL;
     TaskHandle_t tDim = NULL;
 
     /*  
@@ -43,18 +43,9 @@ void handle_cmd(cmd_t inc_cmd)
         xTaskCreate(time_led_task, 
                 "start a timer which steers blinking for 5 s",
                 1024,
-                tLED,   // pass handle of child-thread
+                NULL,
                 1,
                 &tTim);      
-    }
-
-    /*  
-        cancel ringing task if answer occurs from master
-    */
-    if((inc_cmd.content < STATE_TRANS_BORDER_C) && tim_alive)
-    {
-        vTaskDelete(tTim); // program gets stuck here???
-        tim_alive = false;
     }
 
     /*  
@@ -72,26 +63,32 @@ void handle_cmd(cmd_t inc_cmd)
     }
 
     /*  
+        cancel ringing task if answer occurs from master
+    */
+    if((inc_cmd.content < STATE_TRANS_BORDER_C) && tim_alive)
+    {
+        tim_alive = false;
+    }
+
+    /*  
         any action taken while device is entering dim-mode:
         - delete dim-timer
     */
     if(inc_cmd.content != STATE_IDLE && dim_alive)
     {
-        dim_alive = false;
-        
         vTaskDelete(tDim);
-        Serial.printf("killed dim-task\r\n");
+        dim_alive = false;
     }
 
     lcd_display_state(inc_cmd.content);
 
     if(inc_cmd.content < STATE_TRANS_BORDER_C)          
     {   // skip any instances of transitional states
-        Serial.printf("last_cmd '%d' overwritten by '%d'\r\n", last_cmd.content, inc_cmd.content);
+        Serial.printf("\tlast_cmd '%d' overwritten by '%d'\r\n", last_cmd.content, inc_cmd.content);
         last_cmd = inc_cmd;
     }
 
-    Serial.printf("tim-task: %d, dim-task: %d\r\n", tim_alive, dim_alive);
+    Serial.printf("\ttim-task: %d, led-task: %d, dim-task: %d\r\n", tim_alive, led_alive, dim_alive);
 }
 
 
@@ -105,23 +102,69 @@ void handle_ESPnow_output(esp_now_send_status_t* status)
 void time_led_task(void* param)
 {
     tim_alive = true;
-    led_blink();
-    mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, false);
+    led_alive = true;
+    TaskHandle_t tLED = NULL;
+    xTaskCreate(blink_led_task,
+                    "blink green LED",
+                    1024,
+                    NULL,
+                    1,
+                    &tLED);
+
+    // check periodically if timer is not cancelled from outside       
+    uint8_t i = 0;
+    while(tim_alive && (i < RING_AMOUNT))
+    {
+        vTaskDelay((RING_TIME / RING_AMOUNT) / portTICK_PERIOD_MS);
+        i++;
+    }
+    if(!tim_alive)
+    {
+        // process forced to exit by outside means
+        led_alive = false;
+        vTaskDelete(NULL);
+    }
+    else
+    {
+        // process tasked to die after time is up
+        led_alive = false;
+        mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, false);
+        
+        cmd_t cmd = {
+            .origin = ORG_SW,
+            .content = STATE_NO_RESPONSE
+        };
+        mailbox_push(cmd, false);
+        vTaskDelay(DOUBLE_MSG_DELAY * 2 / portTICK_PERIOD_MS);
+        cmd = last_cmd;
+        mailbox_push(cmd, false);
+        tim_alive = false;
+        vTaskDelete(NULL);
+    }
     
-    cmd_t cmd = {
-        .origin = ORG_SW,
-        .content = STATE_NO_RESPONSE
-    };
-    mailbox_push(cmd, false);
-    vTaskDelay(DOUBLE_MSG_DELAY * 2 / portTICK_PERIOD_MS);
-    cmd = last_cmd;
-    mailbox_push(cmd, false);
-    tim_alive = false;
+    
+    
+}
+
+
+void blink_led_task(void* param)
+{
+    while(led_alive)
+    {
+        for(int i = 0; i < 3; i++)
+        {
+            led_on();
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+            led_off();
+            vTaskDelay(100 / portTICK_PERIOD_MS);
+        }
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+    }
     vTaskDelete(NULL);
 }
 
 
-void dim_lcd_task(void* param)  // TASK NOT GETTING KILLED!!!
+void dim_lcd_task(void* param)
 {
     dim_alive = true;
     vTaskDelay(POWER_SAVE_TIME / portTICK_PERIOD_MS);

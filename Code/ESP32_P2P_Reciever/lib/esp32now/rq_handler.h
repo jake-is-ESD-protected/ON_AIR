@@ -14,6 +14,9 @@ void handle_cmd(cmd_t inc_cmd);
 void time_led_task(void* param);
 
 
+void blink_led_task(void* param);
+
+
 void dim_lcd_task(void* param);
 
 #endif

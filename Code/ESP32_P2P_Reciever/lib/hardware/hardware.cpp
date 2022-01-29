@@ -45,7 +45,7 @@ void mailbox_push(cmd_t cmd, bool fromISR)
     {
         xQueueSend(qCMD, &cmd, 1);
     }
-    Serial.printf("Pushed '%d' - command of origin '%d' to mailbox\r\n", cmd.content, cmd.origin);
+    Serial.printf("[PUSH] '%d' - command of origin '%d'\r\n", cmd.content, cmd.origin);
     portEXIT_CRITICAL(&mux);
 }
 
@@ -58,7 +58,7 @@ cmd_t mailbox_pop(void)
         .content = STATE_NO_STATE
     };
     xQueueReceive(qCMD, &cmd, 1);
-    Serial.printf("Popped '%d' - command of origin '%d' from mailbox\r\n", cmd.content, cmd.origin);
+    Serial.printf("[POP]  '%d' - command of origin '%d'\r\n", cmd.content, cmd.origin);
     portEXIT_CRITICAL(&mux);
     return cmd;
 }
@@ -72,7 +72,7 @@ bool mailbox_data_avail(void)
     }
     else
     {
-        Serial.printf("Messages waiting: %d\r\n", uxQueueMessagesWaiting(qCMD));
+        Serial.printf("\tMessages waiting: %d\r\n", uxQueueMessagesWaiting(qCMD));
         return true;
     }
 }

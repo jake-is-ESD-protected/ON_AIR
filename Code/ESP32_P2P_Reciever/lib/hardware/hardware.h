@@ -65,8 +65,9 @@ version:            V1.1
 // digital debounce
 #define IR_DEBOUNCE_TIME          5000
 
-// timings      
-#define RING_TIME                 5
+// timings                 
+#define RING_TIME                 10000
+#define RING_AMOUNT               (RING_TIME / 2000)
 #define POWER_SAVE_TIME           10000
 #define DOUBLE_MSG_DELAY          2000
 
