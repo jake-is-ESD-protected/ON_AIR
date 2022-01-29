@@ -72,7 +72,7 @@ bool mailbox_data_avail(void)
     }
     else
     {
-        Serial.printf("\tMessages waiting: %d\r\n", uxQueueMessagesWaiting(qCMD));
+        //Serial.printf("\tMessages waiting: %d\r\n", uxQueueMessagesWaiting(qCMD));
         return true;
     }
 }

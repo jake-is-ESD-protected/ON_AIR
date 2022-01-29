@@ -69,6 +69,7 @@ version:            V1.1
 #define RING_TIME                 10000
 #define RING_AMOUNT               (RING_TIME / 2000)
 #define POWER_SAVE_TIME           10000
+#define POWER_SAVE_TIME_SPLIT     (POWER_SAVE_TIME / 1000)
 #define DOUBLE_MSG_DELAY          2000
 
 // command data type

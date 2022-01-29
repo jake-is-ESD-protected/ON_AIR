@@ -33,19 +33,22 @@ void handle_cmd(cmd_t inc_cmd)
         - proceed to send message to master
         - blink LED for RING_TIME ms
     */
-    if(inc_cmd.content == STATE_BELL && !tim_alive)
+    if((inc_cmd.content == STATE_BELL) && !tim_alive)
     {
+        dim_alive = false;
+
         esp_err_t err = esp_send((uint8_t)BELL_INT);
         if(err != ESP_OK)
         {
             Serial.printf("failed to send data: %d\r\n", inc_cmd.content);
         }
+        
         xTaskCreate(time_led_task, 
                 "start a timer which steers blinking for 5 s",
                 1024,
                 NULL,
                 1,
-                &tTim);      
+                &tTim);
     }
 
     /*  
@@ -54,6 +57,7 @@ void handle_cmd(cmd_t inc_cmd)
     */
     if(inc_cmd.content == STATE_IDLE && !dim_alive)
     {
+        dim_alive = true;
         xTaskCreate(dim_lcd_task,
                     "go into power saving mode",
                     2048,
@@ -74,27 +78,25 @@ void handle_cmd(cmd_t inc_cmd)
         any action taken while device is entering dim-mode:
         - delete dim-timer
     */
-    if(inc_cmd.content != STATE_IDLE && dim_alive)
+    if((inc_cmd.content != STATE_IDLE) && dim_alive)
     {
-        vTaskDelete(tDim);
         dim_alive = false;
     }
 
     lcd_display_state(inc_cmd.content);
+    Serial.printf("\ttim-task: %d, led-task: %d, dim-task: %d\r\n", tim_alive, led_alive, dim_alive);
 
     if(inc_cmd.content < STATE_TRANS_BORDER_C)          
     {   // skip any instances of transitional states
         Serial.printf("\tlast_cmd '%d' overwritten by '%d'\r\n", last_cmd.content, inc_cmd.content);
         last_cmd = inc_cmd;
     }
-
-    Serial.printf("\ttim-task: %d, led-task: %d, dim-task: %d\r\n", tim_alive, led_alive, dim_alive);
 }
 
 
 void handle_ESPnow_output(esp_now_send_status_t* status)
 {
-    Serial.print("Last Packet Send Status:\t");
+    Serial.print("\tLast Packet Send Status:\t");
     Serial.println(*status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
@@ -141,9 +143,6 @@ void time_led_task(void* param)
         tim_alive = false;
         vTaskDelete(NULL);
     }
-    
-    
-    
 }
 
 
@@ -166,9 +165,22 @@ void blink_led_task(void* param)
 
 void dim_lcd_task(void* param)
 {
-    dim_alive = true;
-    vTaskDelay(POWER_SAVE_TIME / portTICK_PERIOD_MS);
-    mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LCD_DARK}, false);
-    dim_alive = false;
-    vTaskDelete(NULL);
+    // check periodically if dimmer is not cancelled from outside       
+    uint8_t i = 0;
+    while(dim_alive && (i < POWER_SAVE_TIME_SPLIT))
+    {
+        vTaskDelay(((POWER_SAVE_TIME / POWER_SAVE_TIME_SPLIT) / portTICK_PERIOD_MS));
+        i++;
+    }
+    if(!dim_alive)
+    {
+        vTaskDelete(NULL);
+    }
+    else
+    {
+        mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LCD_DARK}, false);
+        dim_alive = false;
+        vTaskDelete(NULL);
+    }
+    
 }

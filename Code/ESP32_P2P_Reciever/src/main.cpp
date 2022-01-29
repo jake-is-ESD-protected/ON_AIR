@@ -32,7 +32,6 @@ void setup() {
   Serial.println(get_mac());
 
   show_init_screen();
-  qCMD = init_ISRs();
   delay(2000);
   display_mac(get_mac());
   delay(4000);
@@ -41,6 +40,7 @@ void setup() {
     .origin = ORG_SW,
     .content = STATE_IDLE
   };
+  qCMD = init_ISRs();
   mailbox_push(c, false);
 }
 
