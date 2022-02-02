@@ -8,12 +8,10 @@ version:            V1.0
 *****************************************************************************************
 */
 
-#define VERBOSE_DEBUG
-
 #include "esp32now.h"
 
 QueueHandle_t qCMD;
-static int cur_cmd = 0;
+portMUX_TYPE mux;
 
 
 void setup() {
@@ -32,45 +30,26 @@ void setup() {
   Serial.printf("Device MAC-address: ");
   Serial.println(get_mac());
 
-  qCMD = init_ISRs();
+
   show_init_screen();
   delay(2000);
   clear_oled();
-  cur_cmd = LEFT; // jump to idle screen
+  
+  cmd_t c = {
+    .origin = ORG_SW,
+    .content = LEFT
+  };
+
+  qCMD = init_ISRs();
+  mailbox_push(c, false); // jump to idle screen
 }
  
 
 void loop() {
-  while(cur_cmd == 0)
+  
+  while(!mailbox_data_avail())
   {
-    xQueueReceive(qCMD, &cur_cmd, NULL);
+    // @_@
   }
-  
-  int cur_state = handle_cmd(cur_cmd);
-
-  cur_cmd = 0;
-
-  //DEBUG("Waiting for input...\n");
-
-  //*******************
-  // YOU ARE HERE
-  //*******************
-  //DEBUG("processing command\n");
-  
-  
-  // // Send message via ESP-NOW
-  // esp_err_t result = esp_now_send((uint8_t*)dest_addr, (uint8_t *) cmd[i], sizeof(cmd[i]));
-  // Serial.printf("Sending %s ...", cmd[i]);
-   
-  // if (result == ESP_OK) {
-  //   Serial.println("Sent with success");
-  // }
-  // else {
-  //   Serial.println("Error sending the data");
-  // }
-  // i++;
-  // if(i == N_CMDS)
-  // {
-  //   i = 0;
-  // }
+  handle_cmd(mailbox_pop());
 }

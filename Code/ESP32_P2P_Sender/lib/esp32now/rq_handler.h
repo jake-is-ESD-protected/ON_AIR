@@ -8,6 +8,6 @@
 void handle_ESPnow_output(esp_now_send_status_t* status);
 
 
-int handle_cmd(int inc_cmd);
+uint8_t handle_cmd(cmd_t inc_cmd);
 
 #endif

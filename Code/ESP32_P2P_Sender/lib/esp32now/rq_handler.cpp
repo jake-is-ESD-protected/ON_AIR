@@ -12,7 +12,7 @@ version:            V1.1
 
 bool bell_ringing = false;
 static int actual_state = STATE_IDLE;
-static int targeted_state = 999; // dummy value
+static int targeted_state = STATE_NO_STATE;
 
 
 void handle_ESPnow_output(esp_now_send_status_t* status)
@@ -22,9 +22,9 @@ void handle_ESPnow_output(esp_now_send_status_t* status)
 }
 
 
-int handle_cmd(int inc_cmd)
+uint8_t handle_cmd(cmd_t inc_cmd)
 {
-    switch(inc_cmd)
+    switch(inc_cmd.content)
     {
         case PUSH:
             actual_state = targeted_state;

@@ -13,7 +13,7 @@ version:            V1.1
 extern QueueHandle_t qCMD;
 
 // peer address of master ESP
-uint8_t dest_addr[] = {0xC8, 0xC9, 0xA3, 0xD2, 0x31, 0x00};
+uint8_t dest_addr[] = {0x94, 0xB9, 0x7E, 0xD4, 0xD9, 0xF0};
 
 // info object
 esp_now_peer_info_t peerInfo;

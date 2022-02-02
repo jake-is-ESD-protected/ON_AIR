@@ -14,8 +14,7 @@ IMPORTANT:          THIS AND ONLY THIS FILE HAS PERMISSION TO WRITE TO HARDWARE
 
 
 MicroOLED oled(-1, 1);
-
-
+extern portMUX_TYPE mux;
 extern QueueHandle_t qCMD;
 static unsigned long last_interrupt_time_RE1 = 0;
 static unsigned long last_interrupt_time_RE2 = 0;
@@ -29,8 +28,11 @@ void IRAM_ATTR RE1_ISR()
     {
         if(digitalRead(RE_CLK) && !(digitalRead(RE_DT) == digitalRead(RE_CLK)))
         {
-            int c = LEFT;
-            xQueueSendFromISR(qCMD, &c, NULL);
+            cmd_t c = {
+                .origin = ORG_HW,
+                .content = LEFT
+            };
+            mailbox_push(c, true);
         }
     }
     last_interrupt_time_RE1 = interrupt_time;
@@ -44,8 +46,11 @@ void IRAM_ATTR RE2_ISR()
     {
         if(digitalRead(RE_DT) && !(digitalRead(RE_DT) == digitalRead(RE_CLK)))
         {
-            int c = RIGHT;
-            xQueueSendFromISR(qCMD, &c, NULL);
+            cmd_t c = {
+                .origin = ORG_HW,
+                .content = RIGHT
+            };
+            mailbox_push(c, true);
         }
     }
     last_interrupt_time_RE2 = interrupt_time;    
@@ -57,10 +62,62 @@ void IRAM_ATTR BUT_ISR()
     unsigned long interrupt_time = millis();
     if (interrupt_time - last_interrupt_time_BUT > IR_DEBOUNCE_TIME)
     {
-        int c = PUSH;
-        xQueueSendFromISR(qCMD, &c, NULL);
+        cmd_t c = {
+            .origin = ORG_HW,
+            .content = PUSH
+        };
+        mailbox_push(c, true);
     }
     last_interrupt_time_BUT = interrupt_time;    
+}
+
+
+void mailbox_push(cmd_t cmd, bool fromISR)
+{
+    portENTER_CRITICAL(&mux);
+    if(fromISR)
+    {
+        xQueueSendFromISR(qCMD, &cmd, NULL);
+    }
+    else
+    {
+        xQueueSend(qCMD, &cmd, 1);
+    }
+    Serial.printf("[PUSH] '%d' - command of origin '%d'\r\n", cmd.content, cmd.origin);
+    portEXIT_CRITICAL(&mux);
+}
+
+
+cmd_t mailbox_pop(void)
+{
+    portENTER_CRITICAL(&mux);
+    cmd_t cmd = {
+        .origin = ORG_SW,
+        .content = STATE_NO_STATE
+    };
+    xQueueReceive(qCMD, &cmd, 1);
+    Serial.printf("[POP]  '%d' - command of origin '%d'\r\n", cmd.content, cmd.origin);
+    portEXIT_CRITICAL(&mux);
+    return cmd;
+}
+
+
+bool mailbox_data_avail(void)
+{
+    if(uxQueueMessagesWaiting(qCMD) == 0)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+QueueHandle_t mailbox_create(uint8_t size)
+{
+    return xQueueCreate(size, sizeof(cmd_t));
 }
 
 
@@ -70,7 +127,9 @@ QueueHandle_t init_ISRs(void)
     attachInterrupt(RE_CLK, RE2_ISR, FALLING);
     attachInterrupt(PUSH_PIN, BUT_ISR, FALLING);
 
-    qCMD = xQueueCreate(50, sizeof(uint8_t));
+    vPortCPUInitializeMutex(&mux);
+
+    qCMD = mailbox_create(30);
     return qCMD;
 }
 
