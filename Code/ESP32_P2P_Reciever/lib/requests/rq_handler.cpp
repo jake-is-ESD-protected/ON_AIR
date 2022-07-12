@@ -9,9 +9,8 @@ version:            V1.0
 */
 
 #include "rq_handler.h"
-
-extern QueueHandle_t qCMD;
-extern portMUX_TYPE mux;
+#include "lcd.h"
+#include "states.h"
 
 bool tim_alive = false;
 bool dim_alive = false;
@@ -48,7 +47,7 @@ void handle_cmd(cmd_t inc_cmd)
                 1024,
                 NULL,
                 1,
-                &tTim);
+                &tTim);       
     }
 
     /*  
@@ -83,7 +82,7 @@ void handle_cmd(cmd_t inc_cmd)
         dim_alive = false;
     }
 
-    lcd_display_state(inc_cmd.content);
+    lcd.display_state(inc_cmd.content);
     Serial.printf("\ttim-task: %d, led-task: %d, dim-task: %d\r\n", tim_alive, led_alive, dim_alive);
 
     if(inc_cmd.content < STATE_TRANS_BORDER_C)          
@@ -130,16 +129,16 @@ void time_led_task(void* param)
     {
         // process tasked to die after time is up
         led_alive = false;
-        mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, false);
+        mbox.push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, tLoop, false);
         
         cmd_t cmd = {
             .origin = ORG_SW,
             .content = STATE_NO_RESPONSE
         };
-        mailbox_push(cmd, false);
+        mbox.push(cmd, tLoop, false);
         vTaskDelay(DOUBLE_MSG_DELAY * 2 / portTICK_PERIOD_MS);
         cmd = last_cmd;
-        mailbox_push(cmd, false);
+        mbox.push(cmd, tLoop, false);
         tim_alive = false;
         vTaskDelete(NULL);
     }
@@ -178,9 +177,8 @@ void dim_lcd_task(void* param)
     }
     else
     {
-        mailbox_push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LCD_DARK}, false);
+        mbox.push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LCD_DARK}, tLoop, false);
         dim_alive = false;
         vTaskDelete(NULL);
     }
-    
 }

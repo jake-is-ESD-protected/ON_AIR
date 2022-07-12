@@ -16,7 +16,6 @@ version:            V1.2
 #include "mainloop.h"
 #include "debug_print.h"
 #include "states.h"
-#include "hardware.h"
 
 
 void setup() {

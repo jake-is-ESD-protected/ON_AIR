@@ -10,10 +10,13 @@ version:            V1.1
 
 #include "rq_handler.h"
 
-bool bell_ringing = false;
 static int actual_state = STATE_IDLE;
 static int targeted_state = STATE_NO_STATE;
 
+flag_t dim_alive{.stat = false, .name = DIM_FLAG};
+flag_t led_alive{.stat = false, .name = LED_FLAG};
+
+TaskHandle_t tDim = NULL;
 
 void handle_ESPnow_output(esp_now_send_status_t* status)
 {
@@ -24,6 +27,7 @@ void handle_ESPnow_output(esp_now_send_status_t* status)
 
 uint8_t handle_cmd(cmd_t inc_cmd)
 {
+    set_flag(dim_alive, false);
     switch(inc_cmd.content)
     {
         case PUSH:
@@ -53,27 +57,70 @@ uint8_t handle_cmd(cmd_t inc_cmd)
             break;
 
         case BELL_INT:
-            bell_ringing = true;
             targeted_state = STATE_BELL;
             actual_state = targeted_state;
+            // kickstart a blinking-thread here
+            break;
+
+        case SLEEP:
+            clear_oled();
             break;
 
         default:
             break;
     }
-    if(targeted_state == actual_state)
+
+    // handle software
+    if(targeted_state != actual_state)
     {
-        // commit to state. Transfer data to slave
+        drawbmp(targeted_state, false);
+    }
+    else
+    {
         drawbmp(actual_state, true);
-        if(actual_state != STATE_BELL)
+        if((actual_state != STATE_BELL) && (inc_cmd.content == PUSH))
         {
             esp_send((uint8_t)actual_state);
         }
     }
+    
+    set_flag(dim_alive, true);
+    xTaskCreate(dim_task, "dim task", 1024, NULL, 1, &tDim);
+
+    return targeted_state;
+}
+
+
+void dim_task(void* param)
+{
+    uint32_t i = 0;
+    Serial.printf("hello from dim task! dim alive: %d\n", dim_alive.stat);
+    while(dim_alive.stat && i < POWER_SAVE_TIME)
+    {
+        vTaskDelay(POWER_SAVE_TIME_TICK / portTICK_PERIOD_MS);
+        i++;
+    }
+    Serial.printf("times up! %d\n", i);
+
+    // device was touched before sleep time up
+    if(i < POWER_SAVE_TIME)
+    {
+        vTaskDelete(NULL);
+    }
+
+    // device enters sleep mode
     else
     {
-        drawbmp(targeted_state, false);
+        mailbox_push({.origin=ORG_SW, .content=SLEEP}, false);
+        set_flag(dim_alive, false);
+        vTaskDelete(NULL);
     }
-    return targeted_state;
+}
+
+
+void set_flag(flag_t flag, bool tf)
+{    
+    flag.stat = tf;
+    Serial.printf("[FLAG]   set flag <%d> to %d\r\n", flag.name, flag.stat);
 }
 

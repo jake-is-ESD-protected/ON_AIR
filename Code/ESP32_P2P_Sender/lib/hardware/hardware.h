@@ -36,8 +36,9 @@ version:            V1.1
 #define RIGHT     101
 #define PUSH      102
 #define BELL_INT  103
-#define RESET   -1
-#define DC      1
+#define SLEEP     104
+#define RESET     -1
+#define DC        1
 
 /*
   The macros here are specifically made
@@ -64,8 +65,15 @@ version:            V1.1
 #define STATE_NO_STATE            80
 #define STATE_ERROR               90
 
+// state attributes
+#define STATE_ATTRIBUTE_BORDER_C  100
+#define STATE_ATTRIBUTE_OLED_ON   101
+#define STATE_ATTRIBUTE_OLED_OFF  102
+
 // digital debounce
-#define IR_DEBOUNCE_TIME  150
+#define IR_DEBOUNCE_TIME          150
+#define POWER_SAVE_TIME           3000
+#define POWER_SAVE_TIME_TICK      1
 
 // command data type
 typedef struct {
