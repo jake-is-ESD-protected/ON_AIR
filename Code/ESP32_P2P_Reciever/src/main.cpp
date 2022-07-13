@@ -18,6 +18,7 @@ version:            V1.2
 #include "states.h"
 #include "hardware.h"
 #include "esp32now.h"
+#include "webserver.h"
 
 
 void setup() {
@@ -37,10 +38,17 @@ void setup() {
   Serial.printf("Device MAC-address: ");
   Serial.println(get_mac());
 
+  xTaskCreate(webserverTask,
+            "webserver hosting",
+            4096,
+            NULL,
+            1,
+            &tWebserver);  
+
   lcd.show_init_screen();
-  delay(2000);
+  vTaskDelay(2000 / portTICK_PERIOD_MS);
   lcd.display_mac(get_mac());
-  delay(4000);
+  vTaskDelay(4000 / portTICK_PERIOD_MS);
   lcd.clear();
 
   cmd_t c = {
@@ -55,7 +63,7 @@ void setup() {
               4096,
               NULL,
               1,
-              &tLoop);
+              &tLoop);          
 
   delay(200);            
 

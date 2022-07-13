@@ -5,6 +5,9 @@
 
 void mainloop(void* param);
 
+void webserverTask(void* param);
+
 extern TaskHandle_t tLoop;
+extern TaskHandle_t tWebserver;
 
 #endif
