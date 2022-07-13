@@ -12,7 +12,7 @@ void mainloop(void* param)
     mbox.wait();
     while(mbox.data_avail())
     {
-      handle_cmd(mbox.pop(false));
+      handle_cmd(mbox.pop(NON_BLOCKING));
     }
   }
 }

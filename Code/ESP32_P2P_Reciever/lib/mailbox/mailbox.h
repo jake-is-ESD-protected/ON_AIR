@@ -13,7 +13,9 @@ version:            V1.2
 
 #include "Arduino.h"
 
-#define QUEUE_SIZE  30
+#define QUEUE_SIZE      30
+#define BLOCKING        true
+#define NON_BLOCKING    false
 
 // command data type
 typedef struct {

@@ -85,7 +85,7 @@ uint8_t handle_cmd(cmd_t inc_cmd)
     }
     
     set_flag(dim_alive, true);
-    xTaskCreate(dim_task, "dim task", 1024, NULL, 1, &tDim);
+    xTaskCreate(dim_task, "dim task", 2048, NULL, 1, &tDim);
 
     return targeted_state;
 }

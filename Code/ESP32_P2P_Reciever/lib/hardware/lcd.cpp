@@ -1,5 +1,4 @@
 #include "lcd.h"
-#include "literals.h"
 #include "states.h"
 #include "hardware.h"
 
