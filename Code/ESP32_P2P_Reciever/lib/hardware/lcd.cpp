@@ -34,30 +34,30 @@ void LCD::display_state(int state)
     switch(state)
     {
         case STATE_IDLE:
+            digitalWrite(LED_ARRAY, LOW);
             this->printf(TXT_IDLE);
             this->setCursor(0, 1);
             this->printf(TXT_SUB_IDLE);
-            digitalWrite(LED_ARRAY, LOW);
             break;
         case STATE_WOEX:
-            this->printf(TXT_WORKING_EXCUSE);
             digitalWrite(LED_ARRAY, HIGH);
+            this->printf(TXT_WORKING_EXCUSE);
             break;
         case STATE_MEET:
-            this->printf(TXT_MEETING_EXCUSE);
             digitalWrite(LED_ARRAY, HIGH);
+            this->printf(TXT_MEETING_EXCUSE);
             break;
         case STATE_RECO:
-            this->printf(TXT_RECORDING_EXCUSE);
             digitalWrite(LED_ARRAY, HIGH);
+            this->printf(TXT_RECORDING_EXCUSE);
             break;
         case STATE_WAIT:
-            this->printf(TXT_WAIT_EXCUSE);
             digitalWrite(LED_ARRAY, HIGH);
+            this->printf(TXT_WAIT_EXCUSE);
             break;
         case STATE_WELC:
-            this->printf(TXT_WELCOME);
             digitalWrite(LED_ARRAY, LOW);
+            this->printf(TXT_WELCOME);
             break;
         case STATE_BELL:
             this->printf(TXT_RINGING);
