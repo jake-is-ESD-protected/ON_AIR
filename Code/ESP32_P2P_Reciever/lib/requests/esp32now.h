@@ -1,9 +1,7 @@
 #ifndef _ESP32NOW_H_
 #define _ESP32NOW_H_
 
-#include "esp_now.h"
-#include "rq_handler.h"
-#include "WiFi.h"
+#include "Arduino.h"
 
 
 int init_receiver(void);

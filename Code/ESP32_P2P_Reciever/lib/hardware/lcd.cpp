@@ -8,6 +8,7 @@ LCD lcd(0x27, 16, 2);
 void LCD::init_all(void)
 {
     Wire.begin();
+    Wire.setClock(10000);
     this->init();
     this->backlight();
 }

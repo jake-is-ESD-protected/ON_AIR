@@ -9,6 +9,11 @@ version:            V1.1
 */
 
 #include "esp32now.h"
+#include "esp_now.h"
+#include "WiFi.h"
+#include "rq_handler.h"
+#include "mailbox.h"
+#include "states.h"
 
 extern QueueHandle_t qCMD;
 
@@ -21,7 +26,8 @@ esp_now_peer_info_t peerInfo;
 
 // on-send callback
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-  handle_ESPnow_output(&status);
+  Serial.print("\tLast Packet Send Status:\t");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
 }
 
 
@@ -32,7 +38,7 @@ void OnDataRecv(const uint8_t * mac, const uint8_t *incomingData, int len) {
     .origin = ORG_NOW,
     .content = *incomingData
   };
-  mailbox_push(cmd, false);
+  mbox.push(cmd, false);
 }
 
 

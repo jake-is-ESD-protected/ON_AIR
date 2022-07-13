@@ -9,8 +9,10 @@ version:            V1.0
 */
 
 #include "rq_handler.h"
+#include "esp32now.h"
 #include "lcd.h"
 #include "states.h"
+#include "hardware.h"
 
 bool tim_alive = false;
 bool dim_alive = false;
@@ -93,12 +95,6 @@ void handle_cmd(cmd_t inc_cmd)
 }
 
 
-void handle_ESPnow_output(esp_now_send_status_t* status)
-{
-    Serial.print("\tLast Packet Send Status:\t");
-    Serial.println(*status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
-}
-
 
 void time_led_task(void* param)
 {
@@ -129,16 +125,18 @@ void time_led_task(void* param)
     {
         // process tasked to die after time is up
         led_alive = false;
-        mbox.push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, tLoop, false);
+        mbox.push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, false);
         
         cmd_t cmd = {
             .origin = ORG_SW,
             .content = STATE_NO_RESPONSE
         };
-        mbox.push(cmd, tLoop, false);
+        mbox.push(cmd, false);
+        mbox.notify(tLoop, false);
         vTaskDelay(DOUBLE_MSG_DELAY * 2 / portTICK_PERIOD_MS);
         cmd = last_cmd;
-        mbox.push(cmd, tLoop, false);
+        mbox.push(cmd, false);
+        mbox.notify(tLoop, false);
         tim_alive = false;
         vTaskDelete(NULL);
     }
@@ -177,7 +175,8 @@ void dim_lcd_task(void* param)
     }
     else
     {
-        mbox.push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LCD_DARK}, tLoop, false);
+        mbox.push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LCD_DARK}, false);
+        mbox.notify(tLoop, false);
         dim_alive = false;
         vTaskDelete(NULL);
     }

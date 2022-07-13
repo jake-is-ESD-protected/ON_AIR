@@ -1,12 +1,8 @@
 #ifndef _RQ_HANDLER_H_
 #define _RQ_HANDLER_H_
 
-#include "esp32now.h"
-//#include "hardware.h"
 #include "mailbox.h"
-
-
-void handle_ESPnow_output(esp_now_send_status_t* status);
+#include "esp_now.h"
 
 
 void handle_cmd(cmd_t inc_cmd);

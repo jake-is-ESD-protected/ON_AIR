@@ -10,13 +10,14 @@ version:            V1.2
 
 #define VERBOSE_DEBUG
 
-#include "esp32now.h"
+
 #include "mailbox.h"
 #include "lcd.h"
 #include "mainloop.h"
 #include "debug_print.h"
 #include "states.h"
 #include "hardware.h"
+#include "esp32now.h"
 
 
 void setup() {
@@ -51,12 +52,15 @@ void setup() {
 
   xTaskCreate(mainloop,
               "main driver loop",
-              2048,
+              4096,
               NULL,
               1,
               &tLoop);
 
-  mbox.push(c, tLoop, false);
+  delay(200);            
+
+  mbox.push(c, false);
+  mbox.notify(tLoop, false);
 }
 
 

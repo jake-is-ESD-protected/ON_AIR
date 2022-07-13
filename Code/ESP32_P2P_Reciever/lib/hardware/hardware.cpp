@@ -27,7 +27,8 @@ void IRAM_ATTR BUT_ISR()
             .origin = ORG_HW,
             .content = STATE_BELL
         };
-        mbox.push(c, tLoop, true);
+        mbox.push(c, true);
+        mbox.notify(tLoop, true);
     }
     last_interrupt_time_BUT = interrupt_time;
 }

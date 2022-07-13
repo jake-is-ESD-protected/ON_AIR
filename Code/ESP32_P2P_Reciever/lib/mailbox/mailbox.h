@@ -29,10 +29,16 @@ class mailbox
     mailbox();
 
 
-    void push(cmd_t cmd, TaskHandle_t task, bool fromISR);
+    void push(cmd_t cmd, bool fromISR);
 
 
     cmd_t pop(bool blocking);
+
+
+    void notify(TaskHandle_t task, bool fromISR);
+
+
+    bool data_avail();
 
 
     void wait();

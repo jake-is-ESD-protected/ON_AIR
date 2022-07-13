@@ -11,10 +11,7 @@ version:            V1.1
 #ifndef _HARDWARE_H_
 #define _HARDWARE_H_
 
-#include <Arduino.h>
-#include "literals.h"
-#include "mailbox.h"
-
+#include "Arduino.h"
 
 // pins
 #define BUTTON_LED_PIN            23
