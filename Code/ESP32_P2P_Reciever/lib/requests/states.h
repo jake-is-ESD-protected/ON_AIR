@@ -19,6 +19,7 @@
 #define STATE_RECO                3
 #define STATE_WAIT                4
 #define STATE_WELC                5
+#define N_STATES                  6
 
 // transitional states
 #define STATE_TRANS_BORDER_C      10
@@ -38,6 +39,6 @@
 // command origins
 #define ORG_HW  0 // command stems from hardware (interrupt)
 #define ORG_SW  1 // command stems from software (task callback)
-#define ORG_NOW 2 // command stems from ESP NOW (master device)
+#define ORG_WS  2 // command stems from browser-client (master device)
 
 #endif

@@ -24,6 +24,8 @@ void LCD::show_init_screen(void)
 {
     this->setCursor(0, 0);
     this->printf(TXT_INIT);
+    this->setCursor(0, 1);
+    this->printf(TXT_INIT_SUB);
 }
 
 

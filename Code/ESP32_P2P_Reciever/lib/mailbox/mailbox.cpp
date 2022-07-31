@@ -62,10 +62,12 @@ void mailbox::notify(TaskHandle_t task, bool fromISR)
     {
         BaseType_t _;
         xTaskNotifyFromISR(task, 0, eNoAction, &_);
+        Serial.printf("[NTFY]\tIn mailbox-notify (ISR)\n");
     }
     else
     {
         xTaskNotify(task, 0, eNoAction);
+        Serial.printf("[NTFY]\tIn mailbox-notify\n");
     }
 }
 

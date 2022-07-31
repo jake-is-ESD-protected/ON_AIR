@@ -7,6 +7,7 @@
 
 
 #define TXT_INIT                "---[ ON AIR ]---"
+#define TXT_INIT_SUB            "V 1.1: Webserver"
 #define TXT_IDLE                "Hi, I'm [ONAIR]!"
 #define TXT_WORKING_EXCUSE      "Arbeite gerade."
 #define TXT_MEETING_EXCUSE      "In einem Meeting"

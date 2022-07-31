@@ -9,10 +9,11 @@ version:            V1.0
 */
 
 #include "rq_handler.h"
-#include "esp32now.h"
 #include "lcd.h"
 #include "states.h"
 #include "hardware.h"
+
+extern TaskHandle_t tWebserver;
 
 bool tim_alive = false;
 bool dim_alive = false;
@@ -20,7 +21,7 @@ bool led_alive = false;
 
 
 static cmd_t last_cmd = {
-    .origin = ORG_NOW,
+    .origin = ORG_WS,
     .content = STATE_IDLE
 };
 
@@ -38,11 +39,12 @@ void handle_cmd(cmd_t inc_cmd)
     {
         dim_alive = false;
 
-        esp_err_t err = esp_send((uint8_t)BELL_INT);
-        if(err != ESP_OK)
-        {
-            Serial.printf("failed to send data: %d\r\n", inc_cmd.content);
-        }
+        cmd_t c = {
+            .origin = ORG_SW,
+            .content = STATE_BELL
+        };
+        mbox.push(c, false);
+        mbox.notify(tWebserver, false);
         
         xTaskCreate(time_led_task, 
                 "start a timer which steers blinking for 5 s",
