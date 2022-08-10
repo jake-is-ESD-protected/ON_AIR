@@ -62,12 +62,12 @@ void mailbox::notify(TaskHandle_t task, bool fromISR)
     {
         BaseType_t _;
         xTaskNotifyFromISR(task, 0, eNoAction, &_);
-        Serial.printf("[NTFY]\tIn mailbox-notify (ISR)\n");
+        // Serial.printf("[NTFY]\tIn mailbox-notify (ISR)\n");
     }
     else
     {
         xTaskNotify(task, 0, eNoAction);
-        Serial.printf("[NTFY]\tIn mailbox-notify\n");
+        // Serial.printf("[NTFY]\tIn mailbox-notify\n");
     }
 }
 
@@ -75,7 +75,7 @@ void mailbox::notify(TaskHandle_t task, bool fromISR)
 bool mailbox::data_avail(void)
 {
     uint8_t n = uxQueueMessagesWaiting(qCMD);
-    Serial.printf("\tCurrently %d items in mailbox\r\n", n);
+    // Serial.printf("\tCurrently %d items in mailbox\r\n", n);
     if(n == 0)
     {
         return false;
@@ -84,7 +84,6 @@ bool mailbox::data_avail(void)
     {
         return true;
     }
-
 }
 
 

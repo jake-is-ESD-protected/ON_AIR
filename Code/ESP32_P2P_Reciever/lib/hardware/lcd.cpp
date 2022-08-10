@@ -1,3 +1,4 @@
+#include "LiquidCrystal_I2C.h"
 #include "lcd.h"
 #include "states.h"
 #include "hardware.h"

@@ -7,7 +7,6 @@ brief:              hardware access
 version:            V1.2
 *****************************************************************************************
 */
-
 #include "hardware.h"
 #include "mailbox.h"
 #include "states.h"

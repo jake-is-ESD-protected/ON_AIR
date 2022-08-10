@@ -8,10 +8,11 @@ version:            V1.0
 *****************************************************************************************
 */
 
+#include "LiquidCrystal_I2C.h"
 #include "rq_handler.h"
-#include "lcd.h"
 #include "states.h"
 #include "hardware.h"
+#include "lcd.h"
 
 extern TaskHandle_t tWebserver;
 

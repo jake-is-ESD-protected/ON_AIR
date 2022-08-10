@@ -4,6 +4,7 @@
 #include "mainloop.h"
 
 webserver ws;
+bool bell = false;
 
 
 webserver::webserver()
@@ -24,12 +25,6 @@ void webserver::init()
                 (uint32_t)((millis() - cur_time) / portTICK_PERIOD_MS));
     printIP();
 
-    xTaskCreate(webserverTask,
-            "webserver hosting",
-            4096,
-            NULL,
-            1,
-            &tWebserver); 
 
     server.on("/", handle_onConnect);
     server.on("/idle", handle_idle);
@@ -39,6 +34,7 @@ void webserver::init()
     server.on("/wait", handle_wait);
     server.on("/welc", handle_welc);
     server.onNotFound(handle_NotFound);
+    server.on("/getState", handle_getState);
 
     server.begin();
 }
@@ -106,6 +102,12 @@ void handle_NotFound()
 }
 
 
+void handle_getState()
+{
+    
+}
+
+
 void webserver::handle(uint8_t state)
 {
     cmd_t c = {
@@ -118,20 +120,6 @@ void webserver::handle(uint8_t state)
 }
 
 
-void webserver::listener()
-{
-    while(1)
-  {
-    mbox.wait();
-    cmd_t c = mbox.pop(NON_BLOCKING);
-    if(c.content == STATE_BELL)
-    {
-        SendHTML(STATE_BELL);
-    }
-  }
-}
-
-
 void webserver::run()
 {
     server.handleClient();
@@ -139,6 +127,8 @@ void webserver::run()
 
 
 String webserver::SendHTML(uint8_t state){
+
+
     String ptr = "<!DOCTYPE html> <html>\n";
     ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
     ptr +="<title>[ONAIR] Web Server</title>\n";
@@ -176,8 +166,13 @@ String webserver::SendHTML(uint8_t state){
 
     if(state == STATE_BELL)
     {
-        ptr += "<a class=\"button button-on\" href=\"/bell\">bell</a>\n";
-        ptr += "<meta http-equiv=\"refresh\" content=\"1\">";
+        bell = true;
+        ptr += "<h2>BELL</h2>\n";
+    }
+
+    if(state != STATE_BELL)
+    {
+        bell = false;   
     }
 
     ptr +="</body>\n";

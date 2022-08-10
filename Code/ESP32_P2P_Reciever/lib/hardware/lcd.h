@@ -1,9 +1,8 @@
 #ifndef _LCD_H_
 #define _LCD_H_
 
+#include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
-#include "LiquidCrystal_I2C.h"
-#include "Wire.h"
 
 
 #define TXT_INIT                "---[ ON AIR ]---"

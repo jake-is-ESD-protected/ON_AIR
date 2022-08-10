@@ -14,8 +14,6 @@
 class webserver
 {
 public:
-
-    TaskHandle_t tListener = NULL;
     
     webserver();
 
@@ -28,8 +26,6 @@ public:
     void handle(uint8_t state);
 
     String SendHTML(uint8_t state);
-
-    void listener();
 
     WebServer server;
 
@@ -57,6 +53,8 @@ void handle_wait();
 void handle_welc();
 
 void handle_NotFound();
+
+void handle_getState();
 
 String SendHTML(uint8_t state);
 

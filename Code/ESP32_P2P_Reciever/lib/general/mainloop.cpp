@@ -28,9 +28,3 @@ void webserverTask(void* param)
     ws.run();
   }
 }
-
-
-void _webserverListener(void* param)
-{
-  ws.listener();
-}
