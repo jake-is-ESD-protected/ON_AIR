@@ -55,20 +55,24 @@ void time_led_task(void* param)
 
     // check periodically if timer is not cancelled from outside       
     uint8_t i = 0;
+    Serial.printf("[DEBUG]\tStarting ring-timeout");
     while(core.tim_alive && (i < RING_AMOUNT))
     {
         vTaskDelay((RING_TIME / RING_AMOUNT) / portTICK_PERIOD_MS);
         i++;
+        Serial.printf(".");
     }
     if(!core.tim_alive)
     {
         // process forced to exit by outside means
         core.led_alive = false;
+        Serial.printf("\r\n[DEBUG]\ttimeout interrupted\r\n");
         vTaskDelete(NULL);
     }
     else
     {
         // process tasked to die after time is up
+        Serial.printf("\r\n[DEBUG]\ttimeout quitting\r\n");
         core.led_alive = false;
         mbox.push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, false);
         
