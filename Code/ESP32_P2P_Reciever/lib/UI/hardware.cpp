@@ -10,8 +10,7 @@ version:            V1.2
 #include "hardware.h"
 #include "mailbox.h"
 #include "states.h"
-#include "mailbox.h"
-#include "mainloop.h"
+#include "tasks.h"
 
 
 static unsigned long last_interrupt_time_BUT = 0;

@@ -1,8 +1,9 @@
 #include "mywebserver.h"
 #include "mailbox.h"
 #include "states.h"
-#include "mainloop.h"
+#include "tasks.h"
 #include "index.h"
+#include "core.h"
 
 webserver ws;
 bool bell = false;
@@ -38,7 +39,7 @@ void webserver::init()
 
     server.begin();
 
-    xTaskCreate(wsClientHandler,
+    xTaskCreate(wsClientHandlerTask,
         "client handler",
         4096,
         NULL,
@@ -111,10 +112,10 @@ void handle_NotFound()
 
 void handle_getBell()
 {
-    Serial.println("[SRVR]\tIn handle_getBell\n");
-    // you need to set a readable var to true if a bell occured
-    // in hardware
-    ws.handle(STATE_BELL);
+    if(core.volatile_state == STATE_BELL)
+    {
+        ws.handle(STATE_BELL);
+    }
 }
 
 

@@ -13,8 +13,7 @@ version:            V1.2
 
 #include "mailbox.h"
 #include "lcd.h"
-#include "mainloop.h"
-#include "debug_print.h"
+#include "tasks.h"
 #include "states.h"
 #include "hardware.h"
 #include "webserver.h"
@@ -23,7 +22,7 @@ version:            V1.2
 void setup() {
 
   Serial.begin(115200);
-  DEBUG("\r\n****************\r\nIDENTIFIER: SLAVE, ON AIR SHIELD\r\n****************\r\n");
+  Serial.printf("\r\n****************\r\nIDENTIFIER: SLAVE, ON AIR SHIELD\r\n****************\r\n");
   
   init_gpios();
   lcd.init_all();
@@ -46,7 +45,7 @@ void setup() {
 
   init_ISRs();
 
-  xTaskCreate(mainloop,
+  xTaskCreate(mainLoopTask,
               "main driver loop",
               4096,
               NULL,
