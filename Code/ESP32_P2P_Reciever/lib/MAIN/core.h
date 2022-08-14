@@ -3,6 +3,7 @@
 
 #include "mailbox.h"
 #include "states.h"
+#include "mywebserver.h"
 
 class c_core
 {
@@ -14,6 +15,7 @@ public:
 
     TaskHandle_t tTim = NULL;
     TaskHandle_t tDim = NULL;
+
 
     cmd_t last_cmd = {
         .origin = ORG_SW,

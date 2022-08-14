@@ -36,11 +36,10 @@ void webserver::init()
 
     // idle
     server.on("/idle", HTTP_GET, [&](AsyncWebServerRequest* req){
-        if(cur_state != STATE_IDLE)
-        {
-            Serial.println("[SRVR]\tIn handle_idle\n");
-            handle(STATE_IDLE);
-        }
+
+        Serial.println("[SRVR]\tIn handle_idle\n");
+        handle(STATE_IDLE);
+
     });
 
     // woex
