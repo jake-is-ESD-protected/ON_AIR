@@ -20,7 +20,7 @@ function setButtonHigh(id) {
 
 function setState(state) {
     var xhttp = new XMLHttpRequest();
-    xhttp.open("PUT", state, true);
+    xhttp.open("GET", state, true);
     xhttp.send();
     setAllButtonsLow()
     setButtonHigh(state)

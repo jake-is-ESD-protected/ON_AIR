@@ -4,6 +4,7 @@
 #include "tasks.h"
 #include "index.h"
 #include "core.h"
+#include "AsyncElegantOTA.h"
 
 webserver ws;
 bool bell = false;
@@ -27,24 +28,83 @@ void webserver::init()
                 (uint32_t)((millis() - cur_time) / portTICK_PERIOD_MS));
     printIP();
 
-    server.on("/", handle_onConnect);
-    server.on("/idle", handle_idle);
-    server.on("/woex", handle_woex);
-    server.on("/meet", handle_meet);
-    server.on("/reco", handle_reco);
-    server.on("/wait", handle_wait);
-    server.on("/welc", handle_welc);
-    server.onNotFound(handle_NotFound);
-    server.on("/getBell", handle_getBell);
+    // index
+    server.on("/", HTTP_GET, [](AsyncWebServerRequest* req){
+        Serial.println("[SRVR]\tIn handle_onConnect\n");
+        req->send(200, "text/html", ws_index);
+    });
 
+    // idle
+    server.on("/idle", HTTP_GET, [&](AsyncWebServerRequest* req){
+        if(cur_state != STATE_IDLE)
+        {
+            Serial.println("[SRVR]\tIn handle_idle\n");
+            handle(STATE_IDLE);
+        }
+    });
+
+    // woex
+    server.on("/woex", HTTP_GET, [&](AsyncWebServerRequest* req){
+        if(cur_state != STATE_WOEX)
+        {
+            Serial.println("[SRVR]\tIn handle_woex\n");
+            handle(STATE_WOEX);
+        }
+    });
+
+    // meet
+    server.on("/meet", HTTP_GET, [&](AsyncWebServerRequest* req){
+        if(cur_state != STATE_MEET)
+        {
+            Serial.println("[SRVR]\tIn handle_meet\n");
+            handle(STATE_MEET);
+        }
+    });
+
+    // reco
+    server.on("/reco", HTTP_GET, [&](AsyncWebServerRequest* req){
+        if(cur_state != STATE_RECO)
+        {
+            Serial.println("[SRVR]\tIn handle_reco\n");
+            handle(STATE_RECO);
+        }
+    });
+
+    // wait
+    server.on("/wait", HTTP_GET, [&](AsyncWebServerRequest* req){
+        if(cur_state != STATE_WAIT)
+        {
+            Serial.println("[SRVR]\tIn handle_wait\n");
+        handle(STATE_WAIT);
+        }
+    });
+
+    // welc
+    server.on("/welc", HTTP_GET, [&](AsyncWebServerRequest* req){
+        if(cur_state != STATE_WELC)
+        {
+            Serial.println("[SRVR]\tIn handle_welc\n");
+            handle(STATE_WELC);
+        }
+    });
+
+    // getBell
+    server.on("/getBell", HTTP_GET, [&](AsyncWebServerRequest* req){
+        if(core.volatile_state == STATE_BELL)
+        {
+            handle(STATE_BELL);
+        }
+    });
+
+    // 404
+    server.onNotFound([](AsyncWebServerRequest* req){
+        Serial.println("[SRVR]\tIn handle_404\n");
+        req->send(200, "text/plain", "404 page not found");
+    });
+
+
+    AsyncElegantOTA.begin(&server);
     server.begin();
-
-    xTaskCreate(wsClientHandlerTask,
-        "client handler",
-        4096,
-        NULL,
-        1,
-        &tClientHandler);  
 }
 
 
@@ -55,75 +115,13 @@ void webserver::printIP()
 }
 
 
-void handle_onConnect()
-{
-    Serial.println("[SRVR]\tIn handle_onConnect\n");
-    ws.server.send(200, "text/html", ws_index);
-}
-
-
-void handle_idle()
-{
-    Serial.println("[SRVR]\tIn handle_idle\n");
-    ws.handle(STATE_IDLE);
-}
-
-
-void handle_woex()
-{
-    Serial.println("[SRVR]\tIn handle_woex\n");
-    ws.handle(STATE_WOEX);
-}
-
-
-void handle_meet()
-{
-    Serial.println("[SRVR]\tIn handle_meet\n");
-    ws.handle(STATE_MEET);
-}
-
-
-void handle_reco()
-{
-    Serial.println("[SRVR]\tIn handle_reco\n");
-    ws.handle(STATE_RECO);
-}
-
-
-void handle_wait()
-{
-    Serial.println("[SRVR]\tIn handle_wait\n");
-    ws.handle(STATE_WAIT);
-}
-
-
-void handle_welc()
-{
-    Serial.println("[SRVR]\tIn handle_welc\n");
-    ws.handle(STATE_WELC);
-}
-
-
-void handle_NotFound()
-{
-    
-}
-
-
-void handle_getBell()
-{
-    if(core.volatile_state == STATE_BELL)
-    {
-        ws.handle(STATE_BELL);
-    }
-}
-
-
 void webserver::handle(uint8_t state)
 {
     if(state == STATE_BELL)
     {   // talk back to client
-        ws.server.send(200, "text/html", "bell");
+        [&](AsyncWebServerRequest* req){
+            req->send(200, "text/html", "bell");
+        };
     }
     else
     {   // process client command
@@ -134,6 +132,8 @@ void webserver::handle(uint8_t state)
         mbox.push(c, false);
         mbox.notify(tLoop, false);
     }
+
+    cur_state = state;
 }
 
 

@@ -32,15 +32,6 @@ void webserverTask(void* param)
 }
 
 
-void wsClientHandlerTask(void* param)
-{
-  while(1)
-  {
-    ws.server.handleClient();
-  }
-}
-
-
 void time_led_task(void* param)
 {
     core.tim_alive = true;

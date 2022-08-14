@@ -3,6 +3,7 @@
 
 #include <WiFi.h>
 #include <WebServer.h>
+#include <ESPAsyncWebServer.h>
 
 
 #define SSID                "Klus4iot"
@@ -27,7 +28,9 @@ public:
 
     String SendHTML(uint8_t state);
 
-    WebServer server;
+    AsyncWebServer server;
+
+    uint8_t cur_state = 222;
 
     
 private:

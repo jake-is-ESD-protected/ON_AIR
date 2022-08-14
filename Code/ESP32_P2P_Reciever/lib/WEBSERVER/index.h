@@ -33,7 +33,7 @@ p{font-size: 14px;color: #888;margin-bottom: 10px;}
 </style>
 
 <body>
-    <h1>[ONAIR]-Webserver</h1>
+    <h1>[ONAIR]-Webserver (OTA edition)</h1>
 
     <button class="button" id="idle" onclick="setState('idle')" style="background-color: #3498db;">Idle</button>
     <button class="button" id="woex" onclick="setState('woex')">Working</button>
@@ -66,7 +66,7 @@ function setButtonHigh(id) {
 
 function setState(state) {
     var xhttp = new XMLHttpRequest();
-    xhttp.open("PUT", state, true);
+    xhttp.open("GET", state, true);
     xhttp.send();
     setAllButtonsLow()
     setButtonHigh(state)
