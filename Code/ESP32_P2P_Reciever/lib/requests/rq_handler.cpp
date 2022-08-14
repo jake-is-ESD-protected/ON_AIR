@@ -7,7 +7,6 @@ brief:              hardware access bridge from higher up requests
 version:            V1.0
 *****************************************************************************************
 */
-
 #include "LiquidCrystal_I2C.h"
 #include "rq_handler.h"
 #include "states.h"

@@ -5,12 +5,14 @@
 
 <body>
     <h1>[ONAIR]-Webserver</h1>
-    <a class="button button-on" href="/idle">idle</a>
-    <a class="button button-on" href="/woex">woex</a>
-    <a class="button button-on" href="/meet">meet</a>
-    <a class="button button-on" href="/reco">reco</a>
-    <a class="button button-on" href="/wait">wait</a>
-    <a class="button button-on" href="/welc">wait</a>
+
+    <button class="button" id="idle" onclick="setState('idle')" style="background-color: #3498db;">Idle</button>
+    <button class="button" id="woex" onclick="setState('woex')">Working</button>
+    <button class="button" id="meet" onclick="setState('meet')">Meeting</button>
+    <button class="button" id="reco" onclick="setState('reco')">Recording</button>
+    <button class="button" id="wait" onclick="setState('wait')">Please wait</button>
+    <button class="button" id="welc" onclick="setState('welc')">Welcome</button>
+    <button class="button" id="bell">Bell</button>
 
     <script>
     </script>

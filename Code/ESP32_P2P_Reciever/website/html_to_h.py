@@ -25,8 +25,8 @@ with open (os.getcwd() + "/website/index.html", "w") as f_index:
 with open (os.getcwd() + "/lib/general/index.h", "w") as f_index:
 
     c_h = "#ifndef _INDEX_H_\n#define _INDEX_H_\n\n"
-    c_h += 'const char index[] = R"=====('
+    c_h += 'const char ws_index[] = R"=====(\n'
     c_h += c_html
-    c_h += ')=====";\n\n#endif'
+    c_h += '\n)=====";\n\n#endif'
 
     f_index.write(c_h) 

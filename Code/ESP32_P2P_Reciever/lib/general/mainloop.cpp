@@ -5,6 +5,7 @@
 
 TaskHandle_t tLoop = NULL;
 TaskHandle_t tWebserver = NULL;
+TaskHandle_t tClientHandler = NULL;
 
 void mainloop(void* param)
 {
@@ -26,5 +27,14 @@ void webserverTask(void* param)
   while(1)
   {
     ws.run();
+  }
+}
+
+
+void wsClientHandler(void* param)
+{
+  while(1)
+  {
+    ws.server.handleClient();
   }
 }

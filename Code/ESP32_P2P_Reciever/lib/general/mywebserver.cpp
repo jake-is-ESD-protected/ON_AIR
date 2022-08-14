@@ -2,6 +2,7 @@
 #include "mailbox.h"
 #include "states.h"
 #include "mainloop.h"
+#include "index.h"
 
 webserver ws;
 bool bell = false;
@@ -25,7 +26,6 @@ void webserver::init()
                 (uint32_t)((millis() - cur_time) / portTICK_PERIOD_MS));
     printIP();
 
-
     server.on("/", handle_onConnect);
     server.on("/idle", handle_idle);
     server.on("/woex", handle_woex);
@@ -34,9 +34,16 @@ void webserver::init()
     server.on("/wait", handle_wait);
     server.on("/welc", handle_welc);
     server.onNotFound(handle_NotFound);
-    server.on("/getState", handle_getState);
+    server.on("/getBell", handle_getBell);
 
     server.begin();
+
+    xTaskCreate(wsClientHandler,
+        "client handler",
+        4096,
+        NULL,
+        1,
+        &tClientHandler);  
 }
 
 
@@ -50,7 +57,7 @@ void webserver::printIP()
 void handle_onConnect()
 {
     Serial.println("[SRVR]\tIn handle_onConnect\n");
-    ws.handle(STATE_IDLE);
+    ws.server.send(200, "text/html", ws_index);
 }
 
 
@@ -102,80 +109,38 @@ void handle_NotFound()
 }
 
 
-void handle_getState()
+void handle_getBell()
 {
-    
+    Serial.println("[SRVR]\tIn handle_getBell\n");
+    // you need to set a readable var to true if a bell occured
+    // in hardware
+    ws.handle(STATE_BELL);
 }
 
 
 void webserver::handle(uint8_t state)
 {
-    cmd_t c = {
-        .origin = ORG_WS,
-        .content = state
-    };
-    mbox.push(c, false);
-    mbox.notify(tLoop, false);
-    server.send(200, "text/html", SendHTML(state));
+    if(state == STATE_BELL)
+    {   // talk back to client
+        ws.server.send(200, "text/html", "bell");
+    }
+    else
+    {   // process client command
+        cmd_t c = {
+            .origin = ORG_WS,
+            .content = state
+        };
+        mbox.push(c, false);
+        mbox.notify(tLoop, false);
+    }
 }
 
 
 void webserver::run()
 {
-    server.handleClient();
-}
-
-
-String webserver::SendHTML(uint8_t state){
-
-
-    String ptr = "<!DOCTYPE html> <html>\n";
-    ptr +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";
-    ptr +="<title>[ONAIR] Web Server</title>\n";
-    ptr +="<style>html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;}\n";
-    ptr +="body{margin-top: 50px;} h1 {color: #444444;margin: 50px auto 30px;} h3 {color: #444444;margin-bottom: 50px;}\n";
-    ptr +=".button {display: block;width: 80px;background-color: #3498db;border: none;color: white;padding: 13px 30px;text-decoration: none;font-size: 25px;margin: 0px auto 35px;cursor: pointer;border-radius: 4px;}\n";
-    ptr +=".button-on {background-color: #3498db;}\n";
-    ptr +=".button-on:active {background-color: #2980b9;}\n";
-    ptr +=".button-off {background-color: #34495e;}\n";
-    ptr +=".button-off:active {background-color: #2c3e50;}\n";
-    ptr +="p {font-size: 14px;color: #888;margin-bottom: 10px;}\n";
-    ptr +="</style>\n";
-    ptr +="</head>\n";
-    ptr +="<body>\n";
-    ptr +="<h1>[ONAIR] Web Server</h1>\n";
-
-    String states_txt[] = {
-        "idle",
-        "woex",
-        "meet",
-        "reco",
-        "wait",
-        "welc"
-    };
-
-    for(uint8_t i = 0; i < N_STATES; i++)
+    mbox.wait();
+    while(mbox.data_avail())
     {
-        String onoff = "off";
-        if(i == state)
-        {
-            onoff = "on";
-        }
-        ptr += "<a class=\"button button-" + onoff + "\" href=\"/" + states_txt[i] + "\">" + states_txt[i] + "</a>\n";
+        handle(mbox.pop(NON_BLOCKING).content);
     }
-
-    if(state == STATE_BELL)
-    {
-        bell = true;
-        ptr += "<h2>BELL</h2>\n";
-    }
-
-    if(state != STATE_BELL)
-    {
-        bell = false;   
-    }
-
-    ptr +="</body>\n";
-    ptr +="</html>\n";
-    return ptr;
 }

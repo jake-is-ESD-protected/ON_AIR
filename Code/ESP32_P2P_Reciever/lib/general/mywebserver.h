@@ -54,7 +54,7 @@ void handle_welc();
 
 void handle_NotFound();
 
-void handle_getState();
+void handle_getBell();
 
 String SendHTML(uint8_t state);
 
