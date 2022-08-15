@@ -15,7 +15,6 @@ version:            V1.0
 #include "lcd.h"
 #include "tasks.h"
 
-extern TaskHandle_t tWebserver;
 c_core core;
 
 
@@ -29,26 +28,21 @@ void c_core::handle_cmd(cmd_t inc_cmd)
 {
     /*  
         button has been pressed:
-        - proceed to send message to master
         - blink LED for RING_TIME ms
+        - wait for client to pick up the bell-status
     */
     if((inc_cmd.content == STATE_BELL) && !tim_alive)
     {
+        bell = true;
+        Serial.printf("[CORE]\tIn bell-handler\n");
         dim_alive = false;
 
-        cmd_t c = {
-            .origin = ORG_SW,
-            .content = STATE_BELL
-        };
-        mbox.push(c, false);
-        mbox.notify(tWebserver, false);
-        
         xTaskCreate(time_led_task, 
-                "start a timer which steers blinking for 5 s",
-                1024,
-                NULL,
-                1,
-                &tTim);       
+            "start a timer which steers blinking for 5 s",
+            1024,
+            NULL,
+            1,
+            &tTim);       
     }
 
     /*  
@@ -57,6 +51,7 @@ void c_core::handle_cmd(cmd_t inc_cmd)
     */
     if(inc_cmd.content == STATE_IDLE && !dim_alive)
     {
+        Serial.printf("[CORE]\tLaunch dimming task\n");
         dim_alive = true;
         xTaskCreate(dim_lcd_task,
                     "go into power saving mode",
@@ -71,6 +66,7 @@ void c_core::handle_cmd(cmd_t inc_cmd)
     */
     if((inc_cmd.content < STATE_TRANS_BORDER_C) && tim_alive)
     {
+        Serial.printf("[CORE]\tRegistered answer from client\n");
         tim_alive = false;
     }
 
@@ -80,16 +76,16 @@ void c_core::handle_cmd(cmd_t inc_cmd)
     */
     if((inc_cmd.content != STATE_IDLE) && dim_alive)
     {
+        Serial.println("[CORE]\tStop dimming task\n");
         dim_alive = false;
     }
 
     lcd.display_state(inc_cmd.content);
-    volatile_state = inc_cmd.content;
     // Serial.printf("\ttim-task: %d, led-task: %d, dim-task: %d\r\n", tim_alive, led_alive, dim_alive);
 
     if(inc_cmd.content < STATE_TRANS_BORDER_C)          
     {   // skip any instances of transitional states
-        Serial.printf("[DEBUG]\tentering state '%d'\r\n", inc_cmd.content);
+        Serial.printf("[CORE]\tentering state '%d'\r\n", inc_cmd.content);
         last_cmd = inc_cmd;
     }
 }

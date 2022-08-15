@@ -38,10 +38,6 @@ public:
     void show_init_screen(void);
 
 
-    // display MAC-adress on screen
-    void display_mac(String mac);
-
-
     // display current state (same as command)
     void display_state(int state);
 

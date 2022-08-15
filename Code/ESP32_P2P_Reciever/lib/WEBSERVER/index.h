@@ -46,7 +46,7 @@ p{font-size: 14px;color: #888;margin-bottom: 10px;}
     <script>
     setInterval(function() {
     // Call a function repetatively with 2 Second interval
-    getBell();
+    getState();
 }, 2000); //2000mSeconds update rate
 
 
@@ -60,18 +60,33 @@ function setAllButtonsLow() {
 
 
 function setButtonHigh(id) {
-    document.getElementById(id).style.backgroundColor="#3498db"
+    document.getElementById(id).style.backgroundColor="#3498db";
 }
 
 
 function setState(state) {
     var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", state, true);
+    xhttp.open("POST", state, true);
     xhttp.send();
-    setAllButtonsLow()
-    setButtonHigh(state)
 }
 
+
+function getState() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            if (this.responseText == "bell") {
+                alert("Somebody is calling!");
+            }
+            else {
+                setAllButtonsLow();
+                setButtonHigh(this.responseText);
+            }
+        }
+    };
+    xhttp.open("GET", "getState", true);
+    xhttp.send();
+}
 
 function getBell() {
     var xhttp = new XMLHttpRequest();

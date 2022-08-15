@@ -14,13 +14,6 @@ void LCD::init_all(void)
 }
 
 
-void LCD::display_mac(String mac)
-{
-    this->setCursor(0, 1);
-    this->println(mac);
-}
-
-
 void LCD::show_init_screen(void)
 {
     this->setCursor(0, 0);

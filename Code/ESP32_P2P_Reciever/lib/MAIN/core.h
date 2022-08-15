@@ -16,14 +16,14 @@ public:
     TaskHandle_t tTim = NULL;
     TaskHandle_t tDim = NULL;
 
+    webserver ws;
+
+    bool bell = false;
 
     cmd_t last_cmd = {
         .origin = ORG_SW,
         .content = STATE_IDLE
     };
-
-    uint8_t volatile_state = STATE_IDLE;
-
 
     c_core();
 

@@ -26,14 +26,6 @@ void setup() {
   
   init_gpios();
   lcd.init_all();
-
-  xTaskCreate(webserverTask,
-            "webserver hosting",
-            4096,
-            NULL,
-            1,
-            &tWebserver);  
-
   lcd.show_init_screen();
   vTaskDelay(3000 / portTICK_PERIOD_MS);
   lcd.clear();
@@ -52,7 +44,7 @@ void setup() {
               1,
               &tLoop);          
 
-  delay(200);            
+  vTaskDelay(3000 / portTICK_PERIOD_MS);         
 
   mbox.push(c, false);
   mbox.notify(tLoop, false);

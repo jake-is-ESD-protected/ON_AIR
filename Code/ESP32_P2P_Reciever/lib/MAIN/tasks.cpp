@@ -5,11 +5,10 @@
 #include "hardware.h"
 
 TaskHandle_t tLoop = NULL;
-TaskHandle_t tWebserver = NULL;
-TaskHandle_t tClientHandler = NULL;
 
 void mainLoopTask(void* param)
 {
+  core.ws.init();
   while(1)
   {
     mbox.wait();
@@ -17,17 +16,6 @@ void mainLoopTask(void* param)
     {
       core.handle_cmd(mbox.pop(NON_BLOCKING));
     }
-  }
-}
-
-
-void webserverTask(void* param)
-{
-  ws.init();
-
-  while(1)
-  {
-    ws.run();
   }
 }
 
@@ -46,17 +34,17 @@ void time_led_task(void* param)
 
     // check periodically if timer is not cancelled from outside       
     uint8_t i = 0;
-    Serial.printf("[DEBUG]\tStarting ring-timeout");
+    Serial.printf("[DEBUG]\tStarting ring-timeout\r\n");
     while(core.tim_alive && (i < RING_AMOUNT))
     {
         vTaskDelay((RING_TIME / RING_AMOUNT) / portTICK_PERIOD_MS);
         i++;
-        Serial.printf(".");
     }
     if(!core.tim_alive)
     {
         // process forced to exit by outside means
         core.led_alive = false;
+        core.bell = false;
         Serial.printf("\r\n[DEBUG]\ttimeout interrupted\r\n");
         vTaskDelete(NULL);
     }
@@ -65,7 +53,7 @@ void time_led_task(void* param)
         // process tasked to die after time is up
         Serial.printf("\r\n[DEBUG]\ttimeout quitting\r\n");
         core.led_alive = false;
-        mbox.push({.origin = ORG_SW, .content = STATE_ATTRIBUTE_LA_OFF}, false);
+        core.bell = false;
         
         cmd_t cmd = {
             .origin = ORG_SW,

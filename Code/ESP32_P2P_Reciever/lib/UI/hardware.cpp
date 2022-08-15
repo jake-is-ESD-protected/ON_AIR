@@ -43,6 +43,7 @@ void init_gpios(void)
     pinMode(BUTTON_IN_PIN, INPUT);
     pinMode(LED_ARRAY, OUTPUT);
     pinMode(BUTTON_LED_PIN, OUTPUT);
+    led_off();
 }
 
 
