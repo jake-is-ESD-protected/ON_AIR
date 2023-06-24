@@ -1,13 +1,3 @@
-/*
-*****************************************************************************************
-source name:        core.cpp
-auth:               Jakob T.
-date:               22
-brief:              fsm
-version:            V1.0
-*****************************************************************************************
-*/
-
 #include "LiquidCrystal_I2C.h"
 #include "core.h"
 #include "states.h"
@@ -15,16 +5,21 @@ version:            V1.0
 #include "lcd.h"
 #include "tasks.h"
 
-c_core core;
+bool tim_alive = false;
+bool dim_alive = false;
+bool led_alive = false;
+bool bell = false;
+
+TaskHandle_t tTim = NULL;
+TaskHandle_t tDim = NULL;
+
+cmd_t last_cmd = {
+    .origin = ORG_SW,
+    .content = STATE_IDLE
+};
 
 
-c_core::c_core()
-{
-
-}
-
-
-void c_core::handle_cmd(cmd_t inc_cmd)
+void handle_cmd(cmd_t inc_cmd)
 {
     /*  
         button has been pressed:
