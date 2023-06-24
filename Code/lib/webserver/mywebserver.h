@@ -8,4 +8,7 @@
 #define WEBSERVER_TIMEOUT   2000
 #define BUFLEN              30
 
+void mywebserver_printIP();
+void mywebserver_init();
+
 #endif

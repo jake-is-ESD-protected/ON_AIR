@@ -1,5 +1,4 @@
 #include "mywebserver.h"
-#include "mailbox.h"
 #include "states.h"
 #include "tasks.h"
 #include "index.h"
@@ -41,50 +40,50 @@ void mywebserver_init()
     // idle
     server->on("/idle", HTTP_POST, [&](AsyncWebServerRequest* req){
         Serial.printf("[SRVR]\tIn handle_idle\n");
-        core.handle_cmd({.origin=ORG_WS, .content=STATE_IDLE});
+        handle_cmd({.origin=ORG_WS, .content=STATE_IDLE});
     });
 
     // woex
     server->on("/woex", HTTP_POST, [&](AsyncWebServerRequest* req){
         Serial.printf("[SRVR]\tIn handle_woex\n");
-        core.handle_cmd({.origin=ORG_WS, .content=STATE_WOEX});
+        handle_cmd({.origin=ORG_WS, .content=STATE_WOEX});
     });
 
     // meet
     server->on("/meet", HTTP_POST, [&](AsyncWebServerRequest* req){
         Serial.printf("[SRVR]\tIn handle_meet\n");
-        core.handle_cmd({.origin=ORG_WS, .content=STATE_MEET});
+        handle_cmd({.origin=ORG_WS, .content=STATE_MEET});
     });
 
     // reco
     server->on("/reco", HTTP_POST, [&](AsyncWebServerRequest* req){
         Serial.printf("[SRVR]\tIn handle_reco\n");
-        core.handle_cmd({.origin=ORG_WS, .content=STATE_RECO});
+        handle_cmd({.origin=ORG_WS, .content=STATE_RECO});
     });
 
     // wait
     server->on("/wait", HTTP_POST, [&](AsyncWebServerRequest* req){
         Serial.printf("[SRVR]\tIn handle_wait\n");
-        core.handle_cmd({.origin=ORG_WS, .content=STATE_WAIT});
+        handle_cmd({.origin=ORG_WS, .content=STATE_WAIT});
     });
 
     // welc
     server->on("/welc", HTTP_POST, [&](AsyncWebServerRequest* req){
         Serial.printf("[SRVR]\tIn handle_welc\n");
-        core.handle_cmd({.origin=ORG_WS, .content=STATE_WELC});
+        handle_cmd({.origin=ORG_WS, .content=STATE_WELC});
     });
 
     // getBell
     server->on("/getState", HTTP_GET, [&](AsyncWebServerRequest* req){
 
-        if(core.bell)
+        if(bell)
         {
             Serial.printf("[SRVR]\ttrying to send a bell!\n");
             req->send(200, "text/html", "bell");
         }
         else
         {
-            switch(core.last_cmd.content)
+            switch(last_cmd.content)
             {
                 case STATE_IDLE:
                 req->send(200, "text/html", "idle");
