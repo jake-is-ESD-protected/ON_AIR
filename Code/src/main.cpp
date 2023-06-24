@@ -13,21 +13,34 @@ version:            V1.2
 
 #include "mailbox.h"
 #include "lcd.h"
-#include "tasks.h"
+#include "mainloop.h"
+#include "debug_print.h"
 #include "states.h"
 #include "hardware.h"
-#include "mywebserver.h"
+#include "esp32now.h"
 
 
 void setup() {
 
   Serial.begin(115200);
-  Serial.printf("\r\n****************\r\nIDENTIFIER: SLAVE, ON AIR SHIELD\r\n****************\r\n");
+  DEBUG("\r\n****************\r\nIDENTIFIER: SLAVE, ON AIR SHIELD\r\n****************\r\n");
   
   init_gpios();
   lcd.init_all();
+
+  int chk = init_receiver();
+  if(chk != 0)
+  {
+    DEBUG("Could not init esp-now\r\n");
+    return;
+  }
+  Serial.printf("Device MAC-address: ");
+  Serial.println(get_mac());
+
   lcd.show_init_screen();
-  vTaskDelay(3000 / portTICK_PERIOD_MS);
+  delay(2000);
+  lcd.display_mac(get_mac());
+  delay(4000);
   lcd.clear();
 
   cmd_t c = {
@@ -37,14 +50,14 @@ void setup() {
 
   init_ISRs();
 
-  xTaskCreate(mainLoopTask,
+  xTaskCreate(mainloop,
               "main driver loop",
               4096,
               NULL,
               1,
-              &tLoop);          
+              &tLoop);
 
-  vTaskDelay(3000 / portTICK_PERIOD_MS);         
+  delay(200);            
 
   mbox.push(c, false);
   mbox.notify(tLoop, false);
