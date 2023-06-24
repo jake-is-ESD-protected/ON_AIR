@@ -6,23 +6,23 @@
 #include <ESPAsyncWebServer.h>
 
 
-#define SSID                "Klus4iot"
-#define PWD                 "222Klus4Satt1"
+#define SSID                "MagentaWLAN-NZNV"
+#define PWD                 "55359820945153582034"
 #define WEBSERVER_TIMEOUT   2000
 
 #define BUFLEN              30
 
-class webserver
+class mywebserver
 {
 public:
     
-    webserver();
+    mywebserver();
 
     void init();
 
     void printIP();
 
-    AsyncWebServer server;
+    AsyncWebServer* server;
 
     
 private:

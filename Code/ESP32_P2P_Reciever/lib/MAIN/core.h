@@ -16,7 +16,7 @@ public:
     TaskHandle_t tTim = NULL;
     TaskHandle_t tDim = NULL;
 
-    webserver ws;
+    mywebserver ws;
 
     bool bell = false;
 
