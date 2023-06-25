@@ -9,7 +9,6 @@ void mainLoopTask(void* param){
     }
 }
 
-
 void time_led_task(void* param){
     set_flag(f_timer_alive, true);
     set_flag(f_led_alive, true);
@@ -33,7 +32,6 @@ void time_led_task(void* param){
         set_flag(f_led_alive, false);
         set_flag(f_bell_alive, false);
         Serial.printf("\r\n[DEBUG]\ttimeout interrupted\r\n");
-        vTaskDelete(NULL);
     }
     else{
         // process tasked to die after time is up
@@ -51,8 +49,8 @@ void time_led_task(void* param){
         c = last_cmd;
         task_notify(*p_t_loop, c, false);
         set_flag(f_timer_alive, false);
-        vTaskDelete(NULL);
     }
+    vTaskDelete(NULL);
 }
 
 
