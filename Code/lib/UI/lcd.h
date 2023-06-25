@@ -4,7 +4,10 @@
 #include <LiquidCrystal_I2C.h>
 #include <Arduino.h>
 
-
+/// @brief String macros for messages visible on the
+/// LCD
+/// @note Macros prefixed with TXT_SUB always appear
+/// on the second row of the display
 #define TXT_INIT                "---[ ON AIR ]---"
 #define TXT_INIT_SUB            "V 1.1: Webserver"
 #define TXT_IDLE                "Hi, I'm [ONAIR]!"
@@ -22,7 +25,7 @@
 #define TXT_SUB_AWAY            "Sorry!"
 #define TXT_SUB_IDLE            "Call Jakob ---->"
 
-
+/// @brief Custom child class of LiquidCrystal_I2C
 class LCD: public LiquidCrystal_I2C
 {
     // inherit constructor
@@ -30,27 +33,29 @@ class LCD: public LiquidCrystal_I2C
 
 public:
 
-    // init the LCD-object
+    /// @brief Combo wrapper for I2C and LCD initializers
     void init_all(void);
 
-
-    // init sequence for LCD
+    /// @brief Init sequence for LCD
+    /// @note Writes content of TXT_INIT on the 1. row
+    /// and TXT_INIT_SUB on the second one
     void show_init_screen(void);
 
-
-    // display current state (same as command)
+    /// @brief UI parser for internal states, prints
+    /// associated text to LCD
+    /// @note Due to strong coupling, the LED array
+    /// (red LEDs behind "ON AIR"-font) are controlled
+    /// inside of this function
     void display_state(int state);
 
-
-    // faster than internal clear, prints whitespaces
+    /// @brief Fast clear for LCD, prints whitespaces
     void clear(void);
 
-
-    // remove backlight from LCD
+    /// @brief Remove backlight from LCD
     void dim(void);
 };
 
-// singleton reference:
+/// @brief Exposure of singelton to rest of hardware module
 extern LCD lcd;
 
 #endif
