@@ -17,8 +17,7 @@ void handle_cmd(cmd_t inc_cmd)
 {
     TaskHandle_t timer = get_task_handle(t_tim);
     TaskHandle_t dimmer = get_task_handle(t_dim);
-    /*  
-        button has been pressed:
+    /*  button has been pressed:
         - blink LED for RING_TIME ms
         - wait for client to pick up the bell-status
     */
@@ -35,8 +34,7 @@ void handle_cmd(cmd_t inc_cmd)
             &timer);       
     }
 
-    /*  
-        device is in idle mode and has not yet started the dim-timer:
+    /*  device is in idle mode and has not yet started the dim-timer:
         - launch dimming-task
     */
     if(inc_cmd.content == STATE_IDLE && !get_flag(f_dimmer_alive)){
@@ -50,16 +48,14 @@ void handle_cmd(cmd_t inc_cmd)
                     &dimmer);
     }
 
-    /*  
-        cancel ringing task if answer occurs from master
+    /*  cancel ringing task if answer occurs from master
     */
     if((inc_cmd.content < STATE_TRANS_BORDER_C) && get_flag(f_timer_alive)){
         Serial.printf("[CORE]\tRegistered answer from client\n");
         set_flag(f_timer_alive, true);
     }
 
-    /*  
-        any action taken while device is entering dim-mode:
+    /*  any action taken while device is entering dim-mode:
         - delete dim-timer
     */
     if((inc_cmd.content != STATE_IDLE) && get_flag(f_dimmer_alive))
