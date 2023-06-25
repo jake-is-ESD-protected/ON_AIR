@@ -3,8 +3,6 @@
 #include "mywebserver.h"
 #include "hardware.h"
 
-TaskHandle_t tLoop = NULL;
-
 void mainLoopTask(void* param){
     while(1){
         handle_cmd(task_notify_take(portMAX_DELAY));
@@ -13,52 +11,53 @@ void mainLoopTask(void* param){
 
 
 void time_led_task(void* param){
-    tim_alive = true;
-    led_alive = true;
-    TaskHandle_t tLED = NULL;
+    set_flag(f_timer_alive, true);
+    set_flag(f_led_alive, true);
+    TaskHandle_t* p_t_LED = get_task_handle(t_led);
     xTaskCreate(blink_led_task,
                     "blink green LED",
                     1024,
                     NULL,
                     1,
-                    &tLED);
+                    p_t_LED);
 
     // check periodically if timer is not cancelled from outside       
     uint8_t i = 0;
     Serial.printf("[DEBUG]\tStarting ring-timeout\r\n");
-    while(tim_alive && (i < RING_AMOUNT)){
+    while(get_flag(f_timer_alive) && (i < RING_AMOUNT)){
         vTaskDelay((RING_TIME / RING_AMOUNT) / portTICK_PERIOD_MS);
         i++;
     }
-    if(!tim_alive){
+    if(!get_flag(f_timer_alive)){
         // process forced to exit by outside means
-        led_alive = false;
-        bell = false;
+        set_flag(f_led_alive, false);
+        set_flag(f_bell_alive, false);
         Serial.printf("\r\n[DEBUG]\ttimeout interrupted\r\n");
         vTaskDelete(NULL);
     }
     else{
         // process tasked to die after time is up
         Serial.printf("\r\n[DEBUG]\ttimeout quitting\r\n");
-        led_alive = false;
-        bell = false;
+        set_flag(f_led_alive, false);
+        set_flag(f_bell_alive, false);
         
         cmd_t c = {
             .origin = ORG_SW,
             .content = STATE_NO_RESPONSE
         };
-        task_notify(tLoop, c, false);
+        TaskHandle_t* p_t_loop = get_task_handle(t_loop);
+        task_notify(*p_t_loop, c, false);
         vTaskDelay(DOUBLE_MSG_DELAY * 2 / portTICK_PERIOD_MS);
         c = last_cmd;
-        task_notify(tLoop, c, false);
-        tim_alive = false;
+        task_notify(*p_t_loop, c, false);
+        set_flag(f_timer_alive, false);
         vTaskDelete(NULL);
     }
 }
 
 
 void blink_led_task(void* param){
-    while(led_alive){
+    while(get_flag(f_led_alive)){
         for(int i = 0; i < 3; i++){
             led_on();
             vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -74,11 +73,11 @@ void blink_led_task(void* param){
 void dim_lcd_task(void* param){
     // check periodically if dimmer is not cancelled from outside       
     uint8_t i = 0;
-    while(dim_alive && (i < POWER_SAVE_TIME_SPLIT)){
+    while(get_flag(f_dimmer_alive) && (i < POWER_SAVE_TIME_SPLIT)){
         vTaskDelay(((POWER_SAVE_TIME / POWER_SAVE_TIME_SPLIT) / portTICK_PERIOD_MS));
         i++;
     }
-    if(!dim_alive){
+    if(!get_flag(f_dimmer_alive)){
         vTaskDelete(NULL);
     }
     else{
@@ -86,8 +85,9 @@ void dim_lcd_task(void* param){
             .origin = ORG_SW, 
             .content = STATE_ATTRIBUTE_LCD_DARK
             };
-        task_notify(tLoop, c, false);
-        dim_alive = false;
+        TaskHandle_t* p_t_loop = get_task_handle(t_loop);
+        task_notify(*p_t_loop, c, false);
+        set_flag(f_dimmer_alive, false);
         vTaskDelete(NULL);
     }
 }

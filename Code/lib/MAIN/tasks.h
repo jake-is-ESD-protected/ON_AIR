@@ -2,25 +2,36 @@
 #define _TASKS_H_
 
 #include "Arduino.h"
+#include "core.h"
 
-// command data type
-typedef struct {
-    uint8_t origin;
-    uint8_t content;
-    uint16_t pad;
-} cmd_t;
-
+/// @brief Task for main loop, replaces Arduino "loop()"
+/// @param param void*, optional parameters
 void mainLoopTask(void* param);
-void webserverTask(void* param);
-void wsClientHandlerTask(void* param);
-void time_led_task(void* param);
-void blink_led_task(void* param);
-void dim_lcd_task(void* param);
-void IRAM_ATTR task_notify(TaskHandle_t t, cmd_t c, bool from_isr);
-cmd_t IRAM_ATTR task_notify_take(TickType_t ticks_to_wait);
 
-extern TaskHandle_t tLoop;
-extern TaskHandle_t tWebserver;
-extern TaskHandle_t tClientHandler;
+/// @brief Task for everything webserver related
+/// @param param void*, optional parameters
+void webserverTask(void* param);
+
+/// @brief Task for fixed time return of LED blinking task
+/// @param param void*, optional parameters
+void time_led_task(void* param);
+
+/// @brief Task for periodically blinking the bell LED
+/// @param param void*, optional parameters
+void blink_led_task(void* param);
+
+/// @brief Task for fixed time poweroff of the display
+/// @param param void*, optional parameters
+void dim_lcd_task(void* param);
+
+/// @brief Task notification wrapper for FreeRTOS "xTaskNotify()"
+/// @param t Taskhandle_t, handle to task to be notified
+/// @param c cmd_t, command to be sent
+/// @param from_isr bool, specifies ISR or non-ISR origin
+void IRAM_ATTR task_notify(TaskHandle_t t, cmd_t c, bool from_isr);
+
+/// @brief Task notification wrapper for FreeRTOS "ulTaskNotifyTake"
+/// @param ticks_to_wait TickType_t, timeout time, use "portMAX_DELAY" for blocking
+cmd_t IRAM_ATTR task_notify_take(TickType_t ticks_to_wait);
 
 #endif

@@ -76,7 +76,7 @@ void mywebserver_init()
     // getBell
     server->on("/getState", HTTP_GET, [&](AsyncWebServerRequest* req){
 
-        if(bell)
+        if(get_flag(f_bell_alive))
         {
             Serial.printf("[SRVR]\ttrying to send a bell!\n");
             req->send(200, "text/html", "bell");

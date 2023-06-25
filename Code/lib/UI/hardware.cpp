@@ -1,15 +1,7 @@
-/*
-*****************************************************************************************
-source name:        hardware.cpp
-auth:               Jakob T.
-date:               16.01.22
-brief:              hardware access
-version:            V1.2
-*****************************************************************************************
-*/
 #include "hardware.h"
 #include "states.h"
 #include "tasks.h"
+#include "core.h"
 
 
 static uint32_t last_interrupt_time_BUT = 0;
@@ -23,7 +15,7 @@ void IRAM_ATTR BUT_ISR() {
             .origin = ORG_HW,
             .content = STATE_BELL
         };
-        task_notify(tLoop, c, true);
+        task_notify(get_task_handle(t_loop), c, true);
     }
     last_interrupt_time_BUT = interrupt_time;
 }
