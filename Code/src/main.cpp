@@ -3,6 +3,7 @@
 #include "states.h"
 #include "hardware.h"
 #include "mywebserver.h"
+#include "core.h"
 
 
 void setup() {
@@ -19,12 +20,14 @@ void setup() {
 
   mywebserver_init();
 
+  TaskHandle_t* p_t_loop = get_task_handle(t_loop);
+
   xTaskCreate(mainLoopTask,
               "main driver loop",
               4096,
               NULL,
               1,
-              &tLoop);
+              p_t_loop);
 
   vTaskDelay(3000 / portTICK_PERIOD_MS);  
 
@@ -33,7 +36,7 @@ void setup() {
     .content = STATE_IDLE
   };       
 
-  task_notify(tLoop, c, false);
+  task_notify(*p_t_loop, c, false);
 }
 
 void loop() {
