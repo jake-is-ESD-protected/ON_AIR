@@ -34,12 +34,12 @@ void init_gpios(void);
 
 
 /// @brief Turn on LED-array
-/// @note Wrapper for digitalWrite(), has effect on LED array
+/// @note Wrapper for digitalWrite(), has effect on button LED
 void led_on(void);
 
 
 /// @brief Turn off LED-array
-/// @note Wrapper for digitalWrite(), has effect on LED array
+/// @note Wrapper for digitalWrite(), has effect on button LED
 void led_off(void);
 
 
