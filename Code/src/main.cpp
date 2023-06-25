@@ -17,7 +17,6 @@ void setup() {
   lcd.show_init_screen();
   vTaskDelay(3000 / portTICK_PERIOD_MS);
   lcd.clear();
-
   mywebserver_init();
 
   TaskHandle_t* p_t_loop = get_task_handle(t_loop);
@@ -29,7 +28,7 @@ void setup() {
               1,
               p_t_loop);
 
-  vTaskDelay(3000 / portTICK_PERIOD_MS);  
+  vTaskDelay(500 / portTICK_PERIOD_MS);  
 
     cmd_t c = {
     .origin = ORG_SW,
