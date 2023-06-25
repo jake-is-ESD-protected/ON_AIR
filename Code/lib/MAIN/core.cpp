@@ -29,7 +29,7 @@ void handle_cmd(cmd_t inc_cmd)
 
         xTaskCreate(time_led_task, 
             "start a timer which steers blinking for 5 s",
-            1024,
+            2048,
             NULL,
             1,
             &timer);       
