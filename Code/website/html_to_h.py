@@ -1,3 +1,8 @@
+"""
+This script turns the web-lang content in its parent folder
+into a c-string to be stored on the ESP32. It is invoked every
+time the `platformio.ini` file is saved or the project is built.
+"""
 import os
 
 css_sig = "</style>"
