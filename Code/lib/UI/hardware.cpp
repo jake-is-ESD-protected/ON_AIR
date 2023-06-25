@@ -15,7 +15,8 @@ void IRAM_ATTR BUT_ISR() {
             .origin = ORG_HW,
             .content = STATE_BELL
         };
-        task_notify(get_task_handle(t_loop), c, true);
+        TaskHandle_t* p_t_loop = get_task_handle(t_loop);
+        task_notify(*p_t_loop, c, true);
     }
     last_interrupt_time_BUT = interrupt_time;
 }
