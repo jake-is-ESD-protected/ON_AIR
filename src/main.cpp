@@ -1,26 +1,23 @@
+// Select your preferred example and flash the project
+// The preprocessor-defines are verbose on purpose to illustrate the usage of this file
 #include <Arduino.h>
+#include "examples.h"
 
-void myTask1(void* param){
-	while(1){
-		Serial.println("In task 1!");
-	}
-}
-
-void myTask2(void* param){
-	while(1){
-		Serial.println("In task 2!");
-	}
-}
-
-TaskHandle_t th_myTask1 = NULL;
-TaskHandle_t th_myTask2 = NULL;
+#define EXAMPLE_TASK_SPAM // uncomment this line if you want to run `example_task_control_IR.cpp`
+#ifndef EXAMPLE_TASK_SPAM
+#define EXAMPLE_TASK_CONTROL_IR
+#endif
 
 void setup(){
-	Serial.begin(115200);
-	xTaskCreate(myTask1, "description for T1", 2048, NULL, 1, &th_myTask1);
-	xTaskCreate(myTask2, "description for T2", 2048, NULL, 1, &th_myTask2);
+    #ifdef EXAMPLE_TASK_SPAM
+    setup_example_task_spam();
+    #endif
+
+    #ifdef EXAMPLE_TASK_CONTROL_IR
+    setup_example_task_control_IR();
+    #endif
 }
 
 void loop(){
-
+    // Nothing to do here! Tasks run in their own loop.
 }
