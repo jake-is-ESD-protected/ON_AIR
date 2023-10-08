@@ -1,5 +1,5 @@
 #include "setup_main.h"
-#include "lcd.h"
+#include "lcdisplay.h"
 #include "tasks.h"
 #include "states.h"
 #include "hardware.h"
